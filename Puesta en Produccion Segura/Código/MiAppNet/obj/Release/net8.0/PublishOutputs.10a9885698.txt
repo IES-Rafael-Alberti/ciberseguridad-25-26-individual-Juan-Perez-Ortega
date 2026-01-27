@@ -1,0 +1,15 @@
+C:\Users\jupeo\OneDrive\Escritorio\MiAppNet\bin\Release\net8.0\publish\MiAppNet.exe
+C:\Users\jupeo\OneDrive\Escritorio\MiAppNet\bin\Release\net8.0\publish\appsettings.Development.json
+C:\Users\jupeo\OneDrive\Escritorio\MiAppNet\bin\Release\net8.0\publish\appsettings.json
+C:\Users\jupeo\OneDrive\Escritorio\MiAppNet\bin\Release\net8.0\publish\global.json
+C:\Users\jupeo\OneDrive\Escritorio\MiAppNet\bin\Release\net8.0\publish\MiAppNet.dll
+C:\Users\jupeo\OneDrive\Escritorio\MiAppNet\bin\Release\net8.0\publish\MiAppNet.deps.json
+C:\Users\jupeo\OneDrive\Escritorio\MiAppNet\bin\Release\net8.0\publish\MiAppNet.runtimeconfig.json
+C:\Users\jupeo\OneDrive\Escritorio\MiAppNet\bin\Release\net8.0\publish\MiAppNet.pdb
+C:\Users\jupeo\OneDrive\Escritorio\MiAppNet\bin\Release\net8.0\publish\Microsoft.AspNetCore.Authentication.JwtBearer.dll
+C:\Users\jupeo\OneDrive\Escritorio\MiAppNet\bin\Release\net8.0\publish\Microsoft.IdentityModel.JsonWebTokens.dll
+C:\Users\jupeo\OneDrive\Escritorio\MiAppNet\bin\Release\net8.0\publish\Microsoft.IdentityModel.Logging.dll
+C:\Users\jupeo\OneDrive\Escritorio\MiAppNet\bin\Release\net8.0\publish\Microsoft.IdentityModel.Protocols.dll
+C:\Users\jupeo\OneDrive\Escritorio\MiAppNet\bin\Release\net8.0\publish\Microsoft.IdentityModel.Protocols.OpenIdConnect.dll
+C:\Users\jupeo\OneDrive\Escritorio\MiAppNet\bin\Release\net8.0\publish\Microsoft.IdentityModel.Tokens.dll
+C:\Users\jupeo\OneDrive\Escritorio\MiAppNet\bin\Release\net8.0\publish\System.IdentityModel.Tokens.Jwt.dll
