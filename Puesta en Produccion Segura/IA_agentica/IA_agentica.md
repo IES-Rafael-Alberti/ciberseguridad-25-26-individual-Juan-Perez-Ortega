@@ -1,4 +1,5 @@
 # Informe de Implementación: Agente Autónomo Local
+
 **Entorno:** Parrot OS / Antigravity (VS Code)
 **Tecnologías:** Ollama, Docker, Protocolo MCP, Cline.
 
@@ -15,7 +16,7 @@ Para el procesamiento del lenguaje natural, se ha utilizado **Ollama** como serv
 
 ---
 
-![Instalacion de Ollama](/IA_agentica/img/Ollama.png)
+![Instalacion de Ollama](./img/Ollama.png)
 
 ---
 
@@ -28,14 +29,20 @@ Para el procesamiento del lenguaje natural, se ha utilizado **Ollama** como serv
 
 ---
 
-![Configuracion de la API](/IA_agentica/img/ConfiguracionAPI.png)
+![Configuracion de la API](./img/ConfiguracionAPI.png)
 
 ---
 
 ## 4. Integración de Capacidades Avanzadas: MCP y Docker
 Para dotar al agente de herramientas del "mundo real" y cumplir con el estándar agéntico, se implementó el protocolo MCP:
-* **Protocolo MCP (Model Context Protocol)**: Se configuró Cline para que pueda conectarse a servidores externos que proporcionan herramientas adicionales (como navegación web, búsqueda en bases de datos o inspección de archivos).
-* **Infraestructura con Docker**: Se integró **Docker Desktop** como la base de ejecución. Muchos de los servidores de herramientas MCP se ejecutan dentro de contenedores Docker, lo que permite al agente levantar entornos de ejecución aislados y seguros para realizar tareas complejas sin comprometer la estabilidad del sistema anfitrión.
+* **Protocolo MCP (Model Context Protocol)**: Se configuró Cline para que pueda conectarse a servidores que proporcionan herramientas adicionales como navegación web o inspección de archivos.
+* **Infraestructura con Docker**: Se integró **Docker Desktop** como la base de ejecución. Los servidores MCP se ejecutan dentro de contenedores Docker, lo que permite al agente levantar entornos aislados y seguros para realizar tareas complejas sin comprometer la estabilidad del sistema anfitrión.
+
+---
+
+![Cline Agente](./img/Cline.png)
+
+---
 
 ## 5. Pruebas de Concepto y Evidencias
 El agente ha demostrado autonomía para realizar las siguientes tareas en el entorno Parrot OS:
@@ -43,8 +50,3 @@ El agente ha demostrado autonomía para realizar las siguientes tareas en el ent
 2.  **Actuación en el Sistema**: Creación automática de carpetas de laboratorio y archivos de configuración.
 3.  **Ejecución de Herramientas**: Uso de contenedores Docker para extender sus capacidades de procesamiento mediante el protocolo MCP.
 
-
-
-
----
-*Informe finalizado y verificado el lun 02 feb 2026 23:45:25 CET*
