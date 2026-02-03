@@ -3,7 +3,7 @@
 ## 1. Instalación de dependencias en Parrot OS
 Iniciamos preparando el sistema con las herramientas necesarias para que el servidor MCP de HexStrike pueda interactuar con el sistema operativo.
 
-![Instalación de dependencias y herramientas de red](/img/Herramientas.png)
+![Instalación de dependencias y herramientas de red](/Puesta%20en%20Produccion%20Segura/HextrikeMCP/img/Herramientas.png)
 ---
 
 ## 2. Instalación y despliegue de HexStrike
