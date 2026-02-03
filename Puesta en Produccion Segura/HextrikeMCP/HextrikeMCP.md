@@ -21,7 +21,7 @@ pip install -r requirements.txt
 python3 hexstrike_server.py --port 8888
 ```
 
-![Instalación de Hestrike](/img/InstalacionHextrike.png)
+![Instalación de Hestrike](/Puesta%20en%20Produccion%20Segura/HextrikeMCP/img/InstalacionHextrike.png)
 
 ---
 
@@ -33,7 +33,7 @@ Configuramos el cliente de Gemini para actuar como el cerebro de nuestra operaci
 npm install -g @google/gemini-cli
 gemini login
 ```
-![Instalación de Geminis](/img/InstalacionGeminis.png)
+![Instalación de Geminis](/Puesta%20en%20Produccion%20Segura/HextrikeMCP/img/InstalacionGeminis.png)
 ---
 
 ## 4. Vinculación MCP (Gemini + HexStrike)
@@ -52,7 +52,7 @@ Verificamos que el estado del servidor aparece como Connected.
 gemini mcp list
 ```
 
-![Estado de conexión entre Gemini y HexStrike](/img/HextrikeGeminisFuncionando.png)
+![Estado de conexión entre Gemini y HexStrike](/Puesta%20en%20Produccion%20Segura/HextrikeMCP/img/HextrikeGeminisFuncionando.png)
 ---
 
 ## 5. Despliegue del Laboratorio (DockerLabs)
@@ -68,7 +68,7 @@ sudo docker run -d --name victima-wargames wargames:latest
 # Identificación de la IP del objetivo
 sudo docker inspect -f '{{range .NetworkSettings.Networks}}{{.IPAddress}}{{end}}' victima-wargames
 ```
-![Despliegue del contenedor y obtención de la IP 172.17.0.2](/img/Dockerlabs.png)
+![Despliegue del contenedor y obtención de la IP 172.17.0.2](/Puesta%20en%20Produccion%20Segura/HextrikeMCP/img/Dockerlabs.png)
 
 ---
 
@@ -89,11 +89,11 @@ Para confirmar que el agente está funcionando, se monitorizan las dos terminale
 1. **Terminal de Gemini**: Muestra el progreso del pensamiento de la IA y el output final interpretado.
 2. **Terminal de HexStrike**: Registra las llamadas a las herramientas locales (Logs de actividad).
 
-![Geminis trabajando](/img/GeminisTrabajando.png)
+![Geminis trabajando](/Puesta%20en%20Produccion%20Segura/HextrikeMCP/img/GeminisTrabajando.png)
 
 ---
 
-![HexStrike trabajando](/img/HextrikeTrabajando.png)
+![HexStrike trabajando](/Puesta%20en%20Produccion%20Segura/HextrikeMCP/img/HextrikeTrabajando.png)
 
 ---
 
@@ -111,7 +111,7 @@ Tras el escaneo agéntico realizado sobre la IP 172.17.0.2, el agente Gemini ha 
 
 ---
 
-![Tabla de puertos y servicios detectados](/img/Escaneosdepuertos.png)
+![Tabla de puertos y servicios detectados](/Puesta%20en%20Produccion%20Segura/HextrikeMCP/img/Escaneosdepuertos.png)
 
 ---
 
