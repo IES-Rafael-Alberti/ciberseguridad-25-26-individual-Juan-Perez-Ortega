@@ -1,0 +1,120 @@
+# Memoria Técnica: Despliegue y Estabilización de Infraestructura SIEM
+
+## Índice de Contenidos
+
+1. **Fase 1: Optimización de Infraestructura Virtual (Hardware)**
+2. **Fase 2: Hardening del Sistema Operativo Kali Linux**
+3. **Fase 3: Despliegue del Stack ELK (Elasticsearch, Logstash, Kibana)**
+4. **Fase 4: Troubleshooting y Validación de Servicios**
+
+---
+
+## 1. Fase 1: Optimización de Infraestructura Virtual (Hardware)
+
+Inicialmente, el despliegue del SIEM presentó fallos críticos debido a recursos insuficientes (1 CPU / 1GB RAM). Se aplicó un re-escalado vertical para garantizar la estabilidad de la JVM:
+
+* **Memoria RAM:** Ampliada a **4096 MB** para evitar desbordamientos durante la indexación.
+* **Procesadores:** Incrementados a **4 CPUs** (100% execution cap) para gestionar procesos paralelos.
+* **Memoria de Intercambio (SWAP):** Se configuraron **4 GB de SWAP** adicionales para actuar como buffer de seguridad ante picos de carga:
+
+  ```bash
+  # Creación y activación de SWAP de 4GB
+  sudo dd if=/dev/zero of=/swapfile bs=1M count=4096
+  sudo chmod 600 /swapfile
+  sudo mkswap /swapfile
+  sudo swapon /swapfile
+  ```
+
+---
+
+## 2. Fase 2: Hardening del Sistema Operativo Kali Linux
+Se realizaron ajustes a nivel de Kernel para cumplir con los requisitos operativos del motor de búsqueda Lucene (Elasticsearch):
+
+**Ajuste de memoria virtual:**
+
+  ```bash
+sudo sysctl -w vm.max_map_count=262144
+```
+
+---
+
+## 3. Fase 3: Despliegue del Stack ELK
+
+Se procedió al despliegue del contenedor centralizado utilizando una red aislada y direccionamiento IP estático para facilitar la ingesta de logs desde sensores IDS:
+
+
+```bash
+
+sudo docker run -p 5601:5601 -p 9200:9200 -p 5044:5044 -it \
+  --name elk --net elk-red --ip 172.20.0.10 \
+  -e "ES_JAVA_OPTS=-Xms1g -Xmx1g" \
+  -d sebp/elk:latest
+```
+
+---
+
+## 4. Fase 4: Troubleshooting y Validación
+Para asegurar el correcto funcionamiento, se monitorizaron los logs internos y se verificó la disponibilidad de los sockets de red:
+
+**Monitoreo de logs:**
+
+```bash
+sudo docker logs -f elk
+```
+
+
+*Elasticsearch*: Confirmación de inicio de nodo con estado started en puerto 9200.
+
+![Elasticsearch](./imagenesSIEM/Elasticsearch.png)
+
+*Logstash*: Confirmación de API operativa para recepción de alertas.
+
+![Logstash](./imagenesSIEM/Logstash.png)
+
+*Kibana*: Verificación de interfaz web en puerto 5601 con estado Ready.
+
+![Kibana](./imagenesSIEM/Kibana.png)
+
+## 5. Fase 5: Implementación del Sensor IDS Snort
+
+Tras validar la disponibilidad del SIEM, se procede a desplegar el sensor de red para capturar tráfico malicioso.
+
+### 5.1. Despliegue del contenedor
+Se utiliza una imagen de Snort preconfigurada, integrándola en la red del proyecto:
+
+```bash
+sudo docker run -it --name snort --net elk-red --ip 172.20.0.20 \
+  -d ciscovvicente/snort-ids:2.9.12
+```
+
+### 5.2. Configuración del Entorno y Reglas Locales
+Una vez desplegado el contenedor, se accede a su consola para realizar la configuración manual de las directivas de seguridad:
+
+```bash
+# Acceso al contenedor en modo interactivo
+sudo docker exec -it snort bash
+```
+
+# Creación de la estructura de directorios para reglas personalizadas
+mkdir -p /etc/snort/rules
+touch /etc/snort/rules/local.rules
+Para validar la capacidad de detección del sensor, se define una regla de firma personalizada para el protocolo ICMP en el archivo /etc/snort/rules/local.rules:
+
+Bash
+# Definición de la firma de detección de ping
+echo 'alert icmp any any -> any any (msg:"ALERTA SIEM: Intruso detectado"; sid:1000001; rev:1;)' > /etc/snort/rules/local.rules
+5.3. Ajustes de Red en el Motor de Detección
+Se procede a editar el archivo maestro de configuración (/etc/snort/snort.conf) para definir el ámbito de escucha y asegurar la carga de la nueva regla:
+
+Definición de Red Local: Se establece la variable HOME_NET al segmento 172.20.0.0/24.
+
+Inclusión de Reglas: Se añade la directiva include $RULE_PATH/local.rules al final del fichero para activar la monitorización personalizada.
+
+Interfaz de Escucha: Se valida en /etc/snort/snort.debian.conf que el dispositivo de captura sea eth0.
+
+5.4. Puesta en Marcha y Validación de Alertas
+Se inicia el motor de Snort en modo consola para observar la captura de tráfico en tiempo real:
+
+Bash
+snort -A console -c /etc/snort/snort.conf -i eth0
+Tras la ejecución, se realiza una prueba de conectividad desde un host externo hacia la dirección IP del sensor (172.20.0.20). El resultado es la generación inmediata de alertas en la consola, confirmando que el IDS está operativo y analizando el tráfico del segmento elk-red correctamente.
