@@ -100,10 +100,12 @@ mkdir -p /etc/snort/rules
 touch /etc/snort/rules/local.rules
 Para validar la capacidad de detección del sensor, se define una regla de firma personalizada para el protocolo ICMP en el archivo /etc/snort/rules/local.rules:
 
-Bash
+```bash
 # Definición de la firma de detección de ping
 echo 'alert icmp any any -> any any (msg:"ALERTA SIEM: Intruso detectado"; sid:1000001; rev:1;)' > /etc/snort/rules/local.rules
-5.3. Ajustes de Red en el Motor de Detección
+```
+
+### 5.3. Ajustes de Red en el Motor de Detección
 Se procede a editar el archivo maestro de configuración (/etc/snort/snort.conf) para definir el ámbito de escucha y asegurar la carga de la nueva regla:
 
 Definición de Red Local: Se establece la variable HOME_NET al segmento 172.20.0.0/24.
@@ -112,9 +114,78 @@ Inclusión de Reglas: Se añade la directiva include $RULE_PATH/local.rules al f
 
 Interfaz de Escucha: Se valida en /etc/snort/snort.debian.conf que el dispositivo de captura sea eth0.
 
-5.4. Puesta en Marcha y Validación de Alertas
+### 5.4. Puesta en Marcha y Validación de Alertas
 Se inicia el motor de Snort en modo consola para observar la captura de tráfico en tiempo real:
 
-Bash
+```bash
 snort -A console -c /etc/snort/snort.conf -i eth0
+```
+
 Tras la ejecución, se realiza una prueba de conectividad desde un host externo hacia la dirección IP del sensor (172.20.0.20). El resultado es la generación inmediata de alertas en la consola, confirmando que el IDS está operativo y analizando el tráfico del segmento elk-red correctamente.
+
+### 5.5. Instalación y Configuración del Agente de Transporte (Filebeat)
+Para que las alertas detectadas por Snort no se queden aisladas en el contenedor, se instala Filebeat como puente hacia el stack ELK.
+
+```bash
+# Instalación del agente
+apt-get update && apt-get install filebeat -y
+
+# Configuración del envío de logs
+cat <<EOF > /etc/filebeat/filebeat.yml
+filebeat.inputs:
+- type: log
+  enabled: true
+  paths:
+    - /var/log/snort/alert
+output.elasticsearch:
+  hosts: ["172.20.0.10:9200"]
+EOF
+```
+
+### 5.6. Ejecución del Flujo de Datos en Segundo Plano
+Debido a la ausencia de un gestor de servicios (systemd) en el contenedor, se inicia el transporte de datos de forma manual para asegurar la persistencia:
+
+```bash
+# Inicio de Filebeat en segundo plano
+filebeat -e -c /etc/filebeat/filebeat.yml &
+```
+
+### 5.7. Configuración de Reglas para Ataques de Fuerza Bruta (SSH)
+
+Se actualiza el archivo /etc/snort/rules/local.rules para detectar patrones de intrusión específicos en el servicio SSH:
+
+```bash
+# Regla para detectar intentos de conexión masivos (Umbral: 5 intentos en 60 seg)
+echo 'alert tcp any any -> $HOME_NET 22 (msg:"ATAQUE FUERZA BRUTA SSH DETECTADO"; flags:S; threshold:type threshold, track by_src, count 5, seconds 60; sid:1000002; rev:1;)' >> /etc/snort/rules/local.rules
+```
+
+### 5.8. Activación del Modo de Escritura Persistente
+
+Para que Kibana pueda visualizar los eventos, Snort debe escribir las alertas en el disco en un formato que Filebeat pueda procesar:
+
+```bash
+# Ejecución de Snort con salida rápida a fichero
+snort -A fast -c /etc/snort/snort.conf -i eth0
+```
+
+### 5.9. Integración y Visualización en Kibana
+
+Una vez el flujo de datos está activo (Snort -> Filebeat -> Elasticsearch), se configura la interfaz gráfica de usuario:
+
+**1.** *Creación de Data View:* En Stack Management > Data Views, se registró el patrón filebeat-*.
+
+**2.** *Sincronización Temporal:* Se seleccionó @timestamp como campo de control para la monitorización en tiempo real.
+
+**3.** *Módulo Discover:* Se validó la recepción de alertas, visualizando picos de actividad coincidentes con las pruebas de intrusión
+
+### 5.10. Ejecución del Ataque Real (Auditoría con Hydra)
+
+Se simula un ataque de fuerza bruta desde el host atacante (Kali) para validar la respuesta total del SIEM:
+
+```bash
+# Ataque desde Kali
+hydra -l admin -P /usr/share/wordlists/rockyou.txt -t 4 172.20.0.20 ssh
+```
+
+![Kibana](./imagenesSIEM/KibanaAlertaAtaque.png
+)
