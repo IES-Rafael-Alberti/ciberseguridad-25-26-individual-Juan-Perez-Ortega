@@ -1,0 +1,10 @@
+{
+  "permissions": {
+    "allow": [
+      "WebFetch(domain:routersecurity.org)",
+      "WebSearch",
+      "WebFetch(domain:emulator.tp-link.com)",
+      "WebFetch(domain:www.tp-link.com)"
+    ]
+  }
+}

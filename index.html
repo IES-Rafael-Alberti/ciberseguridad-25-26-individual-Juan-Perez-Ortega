@@ -1,0 +1,145 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+    <title>GengarOS - Security Lab</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Fira+Code:wght@400;500;700&family=Share+Tech+Mono&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="style.css">
+    <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>👻</text></svg>">
+</head>
+<body>
+
+    <!-- ============================================ -->
+    <!-- 1. GRUB BOOTLOADER OVERLAY                   -->
+    <!-- ============================================ -->
+    <div id="grub-overlay">
+        <div id="bios-screen">
+            <pre id="bios-text"></pre>
+        </div>
+        <div id="grub-screen" class="hidden">
+            <div class="grub-box">
+                <div class="grub-title">GENGAR GNU/Linux 6.6.6-phantom (Security Edition)</div>
+                <div class="grub-separator"></div>
+                <ul id="grub-options"></ul>
+                <div class="grub-separator"></div>
+                <div class="grub-help">
+                    <span class="key-hint">&#x2191;&#x2193;</span> Navegar
+                    <span class="key-hint">Enter</span> Arrancar
+                    <span class="key-hint">Tab</span> Ver todo
+                </div>
+            </div>
+            <div class="grub-version">GRUB version 2.06-gengar | Use arrow keys to select</div>
+        </div>
+    </div>
+
+    <!-- ============================================ -->
+    <!-- MAIN APPLICATION                              -->
+    <!-- ============================================ -->
+    <div id="app" class="hidden">
+
+        <!-- HEADER / TOPBAR -->
+        <header id="topbar">
+            <button id="btn-recovery" title="Recovery Mode (ESC)">
+                <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    <path d="M3 12l9-9 9 9"/><path d="M5 10v10a1 1 0 001 1h3a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1h3a1 1 0 001-1V10"/>
+                </svg>
+            </button>
+            <div id="breadcrumbs">
+                <span class="bc-segment bc-link" data-action="home">~</span>
+            </div>
+            <div id="omnibar-container">
+                <span class="omnibar-icon">$&gt;</span>
+                <input type="text" id="omnibar" placeholder='search --query "proyecto, tag, asignatura..."' autocomplete="off" spellcheck="false">
+                <div id="omnibar-results" class="hidden"></div>
+            </div>
+        </header>
+
+        <!-- SUBJECT NAVIGATION -->
+        <nav id="subject-nav"></nav>
+
+        <!-- DASHBOARD: CARD GRID -->
+        <main id="dashboard">
+            <div id="cards-grid"></div>
+            <div id="no-results" class="hidden">
+                <pre>
+    ╔══════════════════════════════════════╗
+    ║  ERROR 404: No archives found.      ║
+    ║  Try a different search query.       ║
+    ╚══════════════════════════════════════╝
+                </pre>
+            </div>
+        </main>
+
+        <!-- PROJECT DETAIL VIEW -->
+        <section id="project-view" class="hidden">
+            <aside id="toc-sidebar">
+                <div class="toc-header">// TABLE OF CONTENTS</div>
+                <ul id="toc-list"></ul>
+            </aside>
+            <div id="folio">
+                <div id="folio-header">
+                    <div id="folio-meta">
+                        <h1 id="folio-title" class="glitch" data-text=""></h1>
+                        <div id="folio-badges"></div>
+                    </div>
+                    <button id="folio-close" title="Cerrar expediente">&times;</button>
+                </div>
+                <div id="folio-body"></div>
+                <div class="watermark">GENGAR CONFIDENTIAL</div>
+            </div>
+        </section>
+
+        <!-- FOOTER -->
+        <footer id="sys-footer">
+            <div class="footer-left">
+                <span class="status-dot"></span>
+                <span class="footer-label">SYSTEM ONLINE</span>
+            </div>
+            <div class="footer-center">
+                <span class="footer-label">LATENCY: <span class="footer-val">24ms</span></span>
+                <span class="footer-sep">|</span>
+                <span class="footer-label">ENCRYPTION: <span class="footer-val">AES-256</span></span>
+                <span class="footer-sep">|</span>
+                <span class="footer-label">TOTAL_ARCHIVES: <span class="footer-val" id="archive-count">0</span></span>
+            </div>
+            <div class="footer-right">
+                <span class="footer-label" id="footer-clock"></span>
+            </div>
+        </footer>
+    </div>
+
+    <!-- ============================================ -->
+    <!-- 6. GENGAR WIDGET                              -->
+    <!-- ============================================ -->
+    <div id="gengar-widget" class="hidden">
+        <div id="gengar-bubble" class="hidden"></div>
+        <svg viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg" class="gengar-svg">
+            <polygon points="25,30 10,5 38,25" fill="#7B5EA7"/>
+            <polygon points="75,30 90,5 62,25" fill="#7B5EA7"/>
+            <ellipse cx="50" cy="58" rx="42" ry="36" fill="#7B5EA7"/>
+            <circle cx="50" cy="38" r="30" fill="#7B5EA7"/>
+            <ellipse cx="14" cy="62" rx="9" ry="6" fill="#6B4E97"/>
+            <ellipse cx="86" cy="62" rx="9" ry="6" fill="#6B4E97"/>
+            <ellipse cx="36" cy="40" rx="10" ry="12" fill="white"/>
+            <ellipse cx="64" cy="40" rx="10" ry="12" fill="white"/>
+            <ellipse cx="39" cy="40" rx="6" ry="8" fill="#FF3333"/>
+            <ellipse cx="67" cy="40" rx="6" ry="8" fill="#FF3333"/>
+            <circle cx="37" cy="37" r="2.5" fill="white" opacity="0.9"/>
+            <circle cx="65" cy="37" r="2.5" fill="white" opacity="0.9"/>
+            <path d="M22 62 Q28 56 34 62 Q40 56 46 62 Q50 56 56 62 Q62 56 68 62 Q74 56 78 62 Q50 82 22 62Z" fill="#2D1B4E"/>
+            <polygon points="28,62 34,62 31,68" fill="white"/>
+            <polygon points="53,61 57,62 55,68" fill="white"/>
+            <polygon points="68,62 74,62 71,68" fill="white"/>
+            <ellipse cx="35" cy="90" rx="11" ry="5" fill="#6B4E97"/>
+            <ellipse cx="65" cy="90" rx="11" ry="5" fill="#6B4E97"/>
+        </svg>
+    </div>
+
+    <!-- SCRIPTS -->
+    <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
+    <script src="script.js"></script>
+</body>
+</html>
