@@ -91,7 +91,7 @@ const ARCHIVE_DB = [
         difficulty: "Easy",
         type: "md",
         content: "Incidentes en CIberseguridad/2526-u2-2-5-reflexionyresumen-Juan-Perez-Ortega/RESPUESTAS.md",
-        image: "",
+        image: "Incidentes en CIberseguridad/imagenesSIEM/Kibana.png",
         description: "Reflexión sobre gestión de incidentes"
     },
     {
@@ -103,7 +103,7 @@ const ARCHIVE_DB = [
         difficulty: "Medium",
         type: "md",
         content: "Incidentes en CIberseguridad/2526-u3-3-1-recopilaalmacenaanalisis-grupo-4_2526/README.md",
-        image: "",
+        image: "Incidentes en CIberseguridad/imagenesSIEM/KibanaAlertaAtaque.png",
         description: "Técnicas de recopilación y análisis de evidencias digitales"
     },
     {
@@ -115,7 +115,7 @@ const ARCHIVE_DB = [
         difficulty: "Hard",
         type: "md",
         content: "Incidentes en CIberseguridad/2526-u3-3-2-mitrematriz-grupo-4_2526/casopractico.md",
-        image: "",
+        image: "Incidentes en CIberseguridad/imagenesSIEM/Elasticsearch.png",
         description: "Aplicación práctica del framework MITRE ATT&CK"
     },
     {
@@ -127,7 +127,7 @@ const ARCHIVE_DB = [
         difficulty: "Medium",
         type: "md",
         content: "Incidentes en CIberseguridad/2526-u3-3-3-3-investigaciontienda-Juan-Perez-Ortega/README.md",
-        image: "Incidentes en CIberseguridad/2526-u3-3-3-3-investigaciontienda-Juan-Perez-Ortega/image.png",
+        image: "Incidentes en CIberseguridad/imagenesSIEM/Kibana.png",
         description: "Investigación forense de incidente en tienda online"
     },
     {
@@ -139,7 +139,7 @@ const ARCHIVE_DB = [
         difficulty: "Hard",
         type: "md",
         content: "Incidentes en CIberseguridad/2526-u3-3-3-4-logsmimi-Juan-Perez-Ortega/informe.md",
-        image: "",
+        image: "Incidentes en CIberseguridad/imagenesSIEM/KibanaAlertaAtaque.png",
         description: "Análisis forense de logs y detección de Mimikatz"
     },
 
@@ -153,7 +153,7 @@ const ARCHIVE_DB = [
         difficulty: "Easy",
         type: "pdf",
         content: "Normativa en Ciberseguridad/UD0/Actividades_Juridicas_Resueltas.pdf",
-        image: "",
+        image: "Imagenes/gengar.webp",
         description: "Fundamentos jurídicos de la seguridad informática"
     },
     {
@@ -165,7 +165,7 @@ const ARCHIVE_DB = [
         difficulty: "Medium",
         type: "pdf",
         content: "Normativa en Ciberseguridad/UD1/PEC1.UD1.pdf",
-        image: "",
+        image: "Imagenes/gengar.webp",
         description: "Prueba de evaluación continua sobre normativa"
     },
     {
@@ -177,7 +177,7 @@ const ARCHIVE_DB = [
         difficulty: "Hard",
         type: "pdf",
         content: "Normativa en Ciberseguridad/UD3/RAGNormativa/RAG_Normativa.pdf",
-        image: "",
+        image: "Imagenes/gengar.webp",
         description: "Sistema RAG aplicado a normativa de ciberseguridad"
     },
     {
@@ -189,7 +189,7 @@ const ARCHIVE_DB = [
         difficulty: "Medium",
         type: "pdf",
         content: "Normativa en Ciberseguridad/UD3/RAG_LPI/RAG_LPI.pdf",
-        image: "",
+        image: "Imagenes/gengar.webp",
         description: "Sistema RAG para Ley de Propiedad Intelectual"
     },
 
@@ -203,7 +203,7 @@ const ARCHIVE_DB = [
         difficulty: "Hard",
         type: "md",
         content: "Puesta en Produccion Segura/HextrikeMCP/HextrikeMCP.md",
-        image: "",
+        image: "Puesta en Produccion Segura/HextrikeMCP/img/HextrikeTrabajando.png",
         description: "Framework HextrikeMCP para pentesting automatizado"
     },
     {
@@ -214,8 +214,8 @@ const ARCHIVE_DB = [
         tags: ["docker", "web", "infraestructura", "DevOps"],
         difficulty: "Medium",
         type: "md",
-        content: "Puesta en Produccion Segura/Infraestructura_Desarrollo_Web/README.md",
-        image: "",
+        content: "Puesta en Produccion Segura/Infraestructura_Desarrollo_Web/DockerWeb/Ejercicio.md",
+        image: "Puesta en Produccion Segura/Infraestructura_Desarrollo_Web/DockerWeb/img/jpo1.jpg",
         description: "Infraestructura de desarrollo web con Docker"
     },
     {
@@ -227,7 +227,7 @@ const ARCHIVE_DB = [
         difficulty: "Easy",
         type: "md",
         content: "Puesta en Produccion Segura/Login/README.MD",
-        image: "",
+        image: "Puesta en Produccion Segura/Login/img/AccesoConcedido.png",
         description: "Implementación de login seguro en .NET"
     },
     {
@@ -239,7 +239,7 @@ const ARCHIVE_DB = [
         difficulty: "Medium",
         type: "md",
         content: "Puesta en Produccion Segura/Poner_en_marcha_Juice_Shop/juiceShop.md",
-        image: "",
+        image: "Puesta en Produccion Segura/Poner_en_marcha_Juice_Shop/img/PaginaIncioOWASP.png",
         description: "Despliegue y explotación de OWASP Juice Shop"
     },
     {
@@ -250,8 +250,8 @@ const ARCHIVE_DB = [
         tags: ["API", "REST", "docker", "servidor"],
         difficulty: "Medium",
         type: "md",
-        content: "Puesta en Produccion Segura/Web_API/README.md",
-        image: "",
+        content: "Puesta en Produccion Segura/Web_API/DockerServer/Ejercicio.md",
+        image: "Puesta en Produccion Segura/Web_API/DockerServer/img/ContenedorDocker.jpg",
         description: "Desarrollo de Web API con Docker Server"
     },
     {
@@ -263,7 +263,7 @@ const ARCHIVE_DB = [
         difficulty: "Hard",
         type: "md",
         content: "Puesta en Produccion Segura/pps-actividades-owasp-25-26/README.md",
-        image: "",
+        image: "Puesta en Produccion Segura/Poner_en_marcha_Juice_Shop/img/Xss.png",
         description: "Estudio práctico de OWASP Top 10"
     }
 ];
