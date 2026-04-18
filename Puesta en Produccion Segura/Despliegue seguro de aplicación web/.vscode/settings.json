@@ -1,0 +1,6 @@
+{
+  "python.defaultInterpreterPath": "${workspaceFolder}/Puesta en Produccion Segura/Despliegue seguro de aplicación web/.venv/Scripts/python.exe",
+  "python.analysis.extraPaths": [
+    "${workspaceFolder}/Puesta en Produccion Segura/Despliegue seguro de aplicación web"
+  ]
+}

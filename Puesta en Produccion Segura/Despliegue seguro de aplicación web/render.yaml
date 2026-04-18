@@ -1,0 +1,32 @@
+# =========================================================
+# APARTADO: DESPLIEGUE - RENDER
+# Blueprint de Render.com — despliegue reproducible del servicio.
+# Las variables marcadas como `sync: false` se introducen manualmente
+# en el dashboard de Render (principio de gestión de secretos).
+# =========================================================
+
+services:
+  - type: web
+    name: clinica-veterinaria
+    runtime: python
+    plan: free
+    region: frankfurt
+    branch: main
+    rootDir: "Puesta en Produccion Segura/Despliegue seguro de aplicación web"
+    buildCommand: "pip install -r requirements.txt"
+    startCommand: "uvicorn app.main:app --host 0.0.0.0 --port $PORT"
+    healthCheckPath: /health
+    autoDeploy: true
+    envVars:
+      - key: SUPABASE_URL
+        sync: false
+      - key: SUPABASE_KEY
+        sync: false
+      - key: JWT_SECRET
+        generateValue: true
+      - key: JWT_ALGORITHM
+        value: HS256
+      - key: JWT_EXPIRE_MINUTES
+        value: "30"
+      - key: APP_ENV
+        value: production
