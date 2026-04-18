@@ -1,8 +1,8 @@
 # =========================================================
 # APARTADO: DAST - OWASP ZAP BASELINE
-# Análisis dinámico de seguridad sobre la aplicación desplegada
-# en Render. Se ejecuta manualmente (workflow_dispatch) y de forma
-# programada semanalmente. Publica el informe como artifact.
+# Análisis dinámico sobre la aplicación desplegada en Render.
+# Se invoca Docker directamente (la acción zaproxy/action-baseline
+# presenta issues conocidos con permisos y upload-artifact@v4).
 # =========================================================
 
 name: Security - OWASP ZAP DAST
@@ -18,25 +18,30 @@ jobs:
     runs-on: ubuntu-latest
     permissions:
       contents: read
-      issues: write
     steps:
       - name: Checkout
         uses: actions/checkout@v4
 
-      - name: OWASP ZAP Baseline Scan
-        uses: zaproxy/action-baseline@v0.12.0
-        with:
-          target: 'https://clinica-veterinaria-rxnp.onrender.com'
-          fail_action: false
-          allow_issue_writing: false
-          cmd_options: '-a'
+      - name: Preparar directorio de reporte
+        run: |
+          mkdir -p zap-report
+          chmod 777 zap-report
+
+      - name: Ejecutar OWASP ZAP Baseline
+        run: |
+          docker run --rm \
+            -v ${{ github.workspace }}/zap-report:/zap/wrk/:rw \
+            ghcr.io/zaproxy/zaproxy:stable \
+            zap-baseline.py \
+              -t https://clinica-veterinaria-rxnp.onrender.com \
+              -J report_json.json \
+              -w report_md.md \
+              -r report_html.html \
+              -a || true
 
       - name: Subir reporte ZAP
         if: always()
         uses: actions/upload-artifact@v4
         with:
           name: zap-report
-          path: |
-            report_html.html
-            report_md.md
-            report_json.json
+          path: zap-report/
