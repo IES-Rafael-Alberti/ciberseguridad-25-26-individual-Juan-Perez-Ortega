@@ -2,6 +2,8 @@
 
 Aplicación web minimalista que ejemplifica un ciclo completo de **Puesta en Producción Segura**: autenticación OAuth2/JWT, autorización RBAC+ABAC, gestión de secretos, SAST, SCA, DAST y despliegue reproducible en Render.
 
+URL pública: **https://clinica-veterinaria-rxnp.onrender.com**
+
 ---
 
 ## 📂 Estructura
@@ -9,15 +11,19 @@ Aplicación web minimalista que ejemplifica un ciclo completo de **Puesta en Pro
 ```
 .
 ├── app/
-│   ├── main.py          # Aplicación FastAPI (OAuth2, RBAC, ABAC)
-│   └── schema.sql       # DDL para Supabase
-├── .env.example         # APARTADO: GESTIÓN DE SECRETOS
-├── sonar-project.properties   # APARTADO: SAST - SonarQube
-├── .github/workflows/security.yml  # APARTADO: RCA - OWASP Dependency Check
-├── render.yaml          # APARTADO: DESPLIEGUE - Render
+│   ├── main.py                     # FastAPI (OAuth2, RBAC, ABAC, headers de seguridad)
+│   └── schema.sql                  # DDL para Supabase
+├── docs/img/                       # Capturas de evidencia
+├── .env.example                    # APARTADO: GESTIÓN DE SECRETOS
+├── sonar-project.properties        # APARTADO: SAST - SonarQube
+├── render.yaml                     # APARTADO: DESPLIEGUE - Render
 ├── requirements.txt
 └── README.md
 ```
+
+Los workflows de CI/CD están en la raíz del repositorio (`.github/workflows/`):
+- `security.yml` — SCA con OWASP Dependency-Check (se dispara en cada push).
+- `zap.yml` — DAST con OWASP ZAP Baseline (manual / semanal).
 
 ---
 
@@ -27,6 +33,8 @@ Aplicación web minimalista que ejemplifica un ciclo completo de **Puesta en Pro
 1. Crear un proyecto en [supabase.com](https://supabase.com).
 2. Abrir `SQL Editor` y ejecutar el contenido de `app/schema.sql`.
 3. Copiar `Project URL` y `service_role key` (Settings → API).
+
+![Tablas creadas en Supabase](docs/img/01-supabase-tablas.png)
 
 ### 2. Configurar repositorio
 ```bash
@@ -45,14 +53,52 @@ uvicorn app.main:app --reload
 1. En [render.com](https://render.com) → `New` → `Blueprint`.
 2. Apuntar al repositorio; Render detectará `render.yaml`.
 3. En el dashboard, en **Environment**, rellenar `SUPABASE_URL` y `SUPABASE_KEY` (marcados `sync: false`). `JWT_SECRET` se genera automáticamente.
-4. `Apply` → se construye y publica. La URL tendrá el patrón `https://clinica-veterinaria.onrender.com`.
+4. `Apply` → se construye y publica.
 
-### 5. Crear primer usuario admin
-```bash
-curl -X POST https://<tu-url>.onrender.com/register \
-     -H "Content-Type: application/json" \
-     -d '{"email":"admin@clinica.com","password":"SuperSegura123!","role":"admin"}'
-```
+![Servicio desplegado en Render](docs/img/13-render-deploy.png)
+
+Comprobación de vida del servicio:
+
+![Endpoint /health](docs/img/02-health.png)
+
+Swagger UI servido desde Render:
+
+![Swagger UI en producción](docs/img/13b-render-swagger.png)
+
+![Swagger UI local](docs/img/03-swagger.png)
+
+---
+
+## 🔐 Autenticación y Autorización
+
+### Registro (`POST /register`)
+
+![Registro — request](docs/img/04-register-request.png)
+![Registro — response](docs/img/04-register-response.png)
+
+### Login y obtención de JWT (`POST /token`)
+
+![Token — request](docs/img/05-token-request.png)
+![Token — response](docs/img/05-token-response.png)
+
+### RBAC — acceso denegado para rol insuficiente
+
+![RBAC — 403 Forbidden](docs/img/06-rbac-403.png)
+![RBAC — operación permitida](docs/img/06-rbac-ok.png)
+
+### Gestión de recursos (mascotas)
+
+![Crear mascota](docs/img/07-mascota-create.png)
+![Listado de mascotas](docs/img/08-mascotas-list.png)
+![RBAC — bloqueo al crear mascota](docs/img/09-rbac-403.png)
+
+### Flujo de adopción
+
+![Adopción de mascota](docs/img/10-adopcion.png)
+
+### ABAC — descuento del 20 % si la clientela ha adoptado
+
+![ABAC — descuento aplicado](docs/img/11-abac-descuento.png)
 
 ---
 
@@ -65,62 +111,78 @@ curl -X POST https://<tu-url>.onrender.com/register \
 | Autorización RBAC           | `app/main.py` (sección RBAC — `require_roles`) |
 | Autorización ABAC           | `app/main.py` (función `aplicar_descuento_abac`) |
 | Gestión de Secretos         | `.env.example` + `render.yaml` (`sync: false`) |
-| SAST – SonarQube            | `sonar-project.properties` + workflow `security.yml` |
-| RCA – OWASP Dependency Check| `.github/workflows/security.yml` |
+| SAST – SonarQube            | `sonar-project.properties` |
+| SCA – OWASP Dependency Check| `.github/workflows/security.yml` |
 | Despliegue – Render         | `render.yaml` |
-| DAST – OWASP ZAP            | Sección siguiente de este README |
+| DAST – OWASP ZAP            | `.github/workflows/zap.yml` + sección DAST |
+| Cabeceras de seguridad (opc.)| `SecurityHeadersMiddleware` en `app/main.py` |
+
+---
+
+## ⚙️ CI/CD — GitHub Actions
+
+Los workflows se ejecutan automáticamente desde la pestaña *Actions* del repositorio.
+
+![GitHub Actions — workflows](docs/img/12-github-actions.png)
+
+### SCA — OWASP Dependency-Check
+
+Reporte HTML generado por el workflow `security.yml` y publicado como artifact:
+
+![Dependency-Check — reporte](docs/img/12b-dependency-check-report.png)
 
 ---
 
 ## 🛡️ APARTADO: DAST - OWASP ZAP
 
-Guía paso a paso para realizar el escaneo dinámico sobre la URL desplegada en Render.
+Escaneo dinámico sobre la URL en Render, automatizado con GitHub Actions (`.github/workflows/zap.yml`).
 
-### Prerrequisitos
-- Aplicación desplegada y accesible (p. ej. `https://clinica-veterinaria.onrender.com`).
-- [OWASP ZAP](https://www.zaproxy.org/download/) instalado (o imagen Docker `zaproxy/zap-stable`).
-- Un usuario válido creado mediante `POST /register` para ejecutar escaneo autenticado.
+### Ejecución
 
-### Paso 1 — Baseline Scan (pasivo, sin autenticación)
-Escaneo rápido que sólo observa tráfico y detecta cabeceras/configuraciones débiles.
-```bash
-docker run --rm -t zaproxy/zap-stable zap-baseline.py \
-    -t https://clinica-veterinaria.onrender.com \
-    -r baseline-report.html
-```
-Revisar `baseline-report.html`: cabeceras de seguridad (`Strict-Transport-Security`, `X-Content-Type-Options`, `Content-Security-Policy`), cookies inseguras, divulgación de información.
+El workflow se lanza manualmente desde la pestaña *Actions* → *Security - OWASP ZAP DAST* → `Run workflow`, o de forma programada (lunes 03:30 UTC). Invoca directamente la imagen Docker `ghcr.io/zaproxy/zaproxy:stable` con `zap-baseline.py` apuntando a la URL pública y sube el informe HTML/MD/JSON como artifact.
 
-### Paso 2 — Full Scan (activo, requiere autorización)
-> ⚠️ Ejecutar sólo sobre entornos propios. Genera peticiones intrusivas.
-```bash
-docker run --rm -t zaproxy/zap-stable zap-full-scan.py \
-    -t https://clinica-veterinaria.onrender.com \
-    -r full-report.html
-```
+### Resultado — escaneo inicial (sin cabeceras de seguridad)
 
-### Paso 3 — Escaneo autenticado (Swagger + JWT)
-1. Abrir ZAP Desktop.
-2. `Import` → `Import an OpenAPI definition` → URL: `https://clinica-veterinaria.onrender.com/openapi.json`.
-3. Obtener token:
-   ```bash
-   curl -X POST https://clinica-veterinaria.onrender.com/token \
-        -d "username=admin@clinica.com&password=SuperSegura123!"
-   ```
-4. En ZAP: `Tools` → `Options` → `Replacer` → añadir regla:
-   - Match: `Header: Authorization`
-   - Replacement: `Bearer <TOKEN>`
-   - Enable: ✔
-5. Click derecho sobre el site → `Attack` → `Active Scan`.
-6. Al finalizar: `Report` → `Generate Report` → HTML.
+![ZAP — Summary (antes)](docs/img/14-zap-summary.png)
+![ZAP — Alerts (antes)](docs/img/14b-zap-alerts.png)
 
-### Paso 4 — Integración continua (opcional)
-Añadir al workflow `security.yml` un job que ejecute `zaproxy/action-baseline@v0.12.0` apuntando a la URL de Render tras cada despliegue.
+Resumen del baseline inicial:
 
-### Paso 5 — Interpretación de hallazgos
-Clasificar por severidad OWASP Top 10 y priorizar:
-- **High/Critical** → bloquear release.
-- **Medium** → ticket en backlog con SLA.
-- **Informational** → revisar cabeceras y endurecimiento.
+| Riesgo | Alertas |
+|---|---|
+| High | 0 |
+| Medium | 3 |
+| Low | 7 |
+| Informational | 7 |
+
+Las alertas *Medium* correspondían a falta de **CSP**, ausencia de **Anti-Clickjacking** (`X-Frame-Options` / `frame-ancestors`) y falta de **Subresource Integrity**. Las *Low* incluían ausencia de HSTS, X-Content-Type-Options, Permissions-Policy y cabeceras COOP/COEP/CORP.
+
+### Mitigación — `SecurityHeadersMiddleware`
+
+Se añadió un middleware en `app/main.py` que inyecta en cada respuesta las cabeceras recomendadas por OWASP Secure Headers Project:
+
+- `Content-Security-Policy` (con origenes permitidos sólo los necesarios para Swagger)
+- `X-Frame-Options: DENY`
+- `X-Content-Type-Options: nosniff`
+- `Referrer-Policy: strict-origin-when-cross-origin`
+- `Permissions-Policy` restrictiva
+- `Strict-Transport-Security` (HSTS)
+- `Cross-Origin-Opener-Policy`, `Cross-Origin-Resource-Policy`, `Cross-Origin-Embedder-Policy`
+- Elimina la cabecera `Server` (reducción de fingerprinting)
+
+### Resultado — escaneo tras el middleware
+
+![ZAP — Summary (después)](docs/img/14c-zap-summary-post.png)
+![ZAP — Alerts (después)](docs/img/14d-zap-alerts-post.png)
+
+| Riesgo | Antes | Después | Δ |
+|---|---|---|---|
+| High | 0 | 0 | — |
+| Medium | 3 | **0** | −3 ✅ |
+| Low | 7 | 3 | −4 ✅ |
+| Informational | 7 | 5 | −2 ✅ |
+
+El middleware elimina todas las alertas *Medium* y reduce significativamente las *Low*, cerrando el ciclo DAST → mitigación → verificación.
 
 ---
 
@@ -132,4 +194,3 @@ Clasificar por severidad OWASP Top 10 y priorizar:
 | `veterinario` | Crear mascotas |
 | `ventas`      | Crear productos |
 | `clientela`   | Adoptar, ver catálogo (recibe 20% ABAC si ha adoptado) |
-
