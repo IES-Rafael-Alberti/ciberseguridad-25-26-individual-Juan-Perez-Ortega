@@ -2,10 +2,12 @@
 # APARTADO: RCA - OWASP DEPENDENCY CHECK
 # Workflow de GitHub Actions que ejecuta análisis de composición
 # de software (SCA) sobre las dependencias Python del proyecto.
-# Complementa al SAST de SonarQube con análisis de CVEs conocidas.
+# El SAST con SonarCloud se documenta en sonar-project.properties
+# y se ejecuta manualmente desde el dashboard (evita requerir
+# SONAR_TOKEN en el repositorio del centro educativo).
 # =========================================================
 
-name: Security - OWASP Dependency Check & SAST
+name: Security - OWASP Dependency Check
 
 on:
   push:
@@ -28,15 +30,16 @@ jobs:
         with:
           python-version: '3.11'
 
-      - name: Instalar dependencias
-        working-directory: "Puesta en Produccion Segura/Despliegue seguro de aplicación web"
-        run: pip install -r requirements.txt
+      - name: Copiar requirements.txt a la raíz
+        # La acción no maneja bien rutas con espacios; copiamos el fichero
+        # a la raíz del workspace para un escaneo limpio.
+        run: cp "Puesta en Produccion Segura/Despliegue seguro de aplicación web/requirements.txt" ./requirements.txt
 
       - name: OWASP Dependency Check
         uses: dependency-check/Dependency-Check_Action@main
         with:
           project: 'clinica-veterinaria'
-          path: 'Puesta en Produccion Segura/Despliegue seguro de aplicación web'
+          path: '.'
           format: 'HTML'
           out: 'reports'
           args: >-
@@ -48,18 +51,3 @@ jobs:
         with:
           name: dependency-check-report
           path: reports
-
-  sonarcloud:
-    name: SonarCloud SAST
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v4
-        with:
-          fetch-depth: 0
-      - name: SonarCloud Scan
-        uses: SonarSource/sonarcloud-github-action@master
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-          SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
-        with:
-          projectBaseDir: "Puesta en Produccion Segura/Despliegue seguro de aplicación web"
