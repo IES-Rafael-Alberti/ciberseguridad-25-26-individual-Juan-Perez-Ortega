@@ -9,9 +9,10 @@ import os
 from datetime import datetime, timedelta
 from typing import Optional, List
 
-from fastapi import FastAPI, Depends, HTTPException, status
+from fastapi import FastAPI, Depends, HTTPException, Request, status
 from fastapi.security import OAuth2PasswordBearer, OAuth2PasswordRequestForm
 from fastapi.responses import HTMLResponse
+from starlette.middleware.base import BaseHTTPMiddleware
 from pydantic import BaseModel, EmailStr
 from jose import JWTError, jwt
 from passlib.context import CryptContext
@@ -21,6 +22,39 @@ from dotenv import load_dotenv
 load_dotenv()
 
 app = FastAPI(title="Clínica Veterinaria API", version="1.0.0")
+
+
+# ########## APARTADO: CABECERAS DE SEGURIDAD HTTP ##########
+# Middleware que añade cabeceras defensivas a cada respuesta.
+# Mitiga hallazgos ZAP (CSP, Anti-clickjacking, SRI, HSTS, COOP/COEP/CORP,
+# X-Content-Type-Options, Permissions-Policy) y aplica el principio de
+# defensa en profundidad (OWASP Secure Headers Project).
+class SecurityHeadersMiddleware(BaseHTTPMiddleware):
+    async def dispatch(self, request: Request, call_next):
+        response = await call_next(request)
+        response.headers["Content-Security-Policy"] = (
+            "default-src 'self'; "
+            "script-src 'self' 'unsafe-inline' https://cdn.jsdelivr.net; "
+            "style-src 'self' 'unsafe-inline' https://cdn.jsdelivr.net; "
+            "img-src 'self' data: https://fastapi.tiangolo.com; "
+            "frame-ancestors 'none'; base-uri 'self'; form-action 'self'"
+        )
+        response.headers["X-Frame-Options"] = "DENY"
+        response.headers["X-Content-Type-Options"] = "nosniff"
+        response.headers["Referrer-Policy"] = "strict-origin-when-cross-origin"
+        response.headers["Permissions-Policy"] = (
+            "accelerometer=(), camera=(), geolocation=(), gyroscope=(), "
+            "magnetometer=(), microphone=(), payment=(), usb=()"
+        )
+        response.headers["Strict-Transport-Security"] = "max-age=31536000; includeSubDomains"
+        response.headers["Cross-Origin-Opener-Policy"] = "same-origin"
+        response.headers["Cross-Origin-Resource-Policy"] = "same-origin"
+        response.headers["Cross-Origin-Embedder-Policy"] = "require-corp"
+        response.headers.pop("Server", None)
+        return response
+
+
+app.add_middleware(SecurityHeadersMiddleware)
 
 
 # ########## APARTADO: GESTIÓN DE SECRETOS (carga runtime) ##########
