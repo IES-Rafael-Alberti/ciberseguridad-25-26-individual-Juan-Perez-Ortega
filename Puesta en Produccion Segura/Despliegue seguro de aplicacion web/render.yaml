@@ -12,7 +12,7 @@ services:
     plan: free
     region: frankfurt
     branch: main
-    rootDir: "Puesta en Produccion Segura/Despliegue seguro de aplicación web"
+    rootDir: "Puesta en Produccion Segura/Despliegue seguro de aplicacion web"
     buildCommand: "pip install -r requirements.txt"
     startCommand: "uvicorn app.main:app --host 0.0.0.0 --port $PORT"
     healthCheckPath: /health

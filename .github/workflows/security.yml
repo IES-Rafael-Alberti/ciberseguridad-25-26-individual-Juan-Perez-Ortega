@@ -33,7 +33,7 @@ jobs:
       - name: Copiar requirements.txt a la raíz
         # La acción no maneja bien rutas con espacios; copiamos el fichero
         # a la raíz del workspace para un escaneo limpio.
-        run: cp "Puesta en Produccion Segura/Despliegue seguro de aplicación web/requirements.txt" ./requirements.txt
+        run: cp "Puesta en Produccion Segura/Despliegue seguro de aplicacion web/requirements.txt" ./requirements.txt
 
       - name: OWASP Dependency Check
         uses: dependency-check/Dependency-Check_Action@main
