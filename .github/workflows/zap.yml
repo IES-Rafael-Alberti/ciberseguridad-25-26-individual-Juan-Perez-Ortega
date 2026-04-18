@@ -1,0 +1,42 @@
+# =========================================================
+# APARTADO: DAST - OWASP ZAP BASELINE
+# Análisis dinámico de seguridad sobre la aplicación desplegada
+# en Render. Se ejecuta manualmente (workflow_dispatch) y de forma
+# programada semanalmente. Publica el informe como artifact.
+# =========================================================
+
+name: Security - OWASP ZAP DAST
+
+on:
+  workflow_dispatch:
+  schedule:
+    - cron: '30 3 * * 1'  # Lunes 03:30 UTC — escaneo semanal
+
+jobs:
+  zap-baseline:
+    name: OWASP ZAP Baseline Scan
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      issues: write
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: OWASP ZAP Baseline Scan
+        uses: zaproxy/action-baseline@v0.12.0
+        with:
+          target: 'https://clinica-veterinaria-rxnp.onrender.com'
+          fail_action: false
+          allow_issue_writing: false
+          cmd_options: '-a'
+
+      - name: Subir reporte ZAP
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: zap-report
+          path: |
+            report_html.html
+            report_md.md
+            report_json.json
