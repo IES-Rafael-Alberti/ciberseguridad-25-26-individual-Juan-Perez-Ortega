@@ -265,6 +265,18 @@ const ARCHIVE_DB = [
         content: "Puesta en Produccion Segura/pps-actividades-owasp-25-26/README.md",
         image: "Puesta en Produccion Segura/Poner_en_marcha_Juice_Shop/img/Xss.png",
         description: "Estudio práctico de OWASP Top 10"
+    },
+    {
+        id: 22,
+        title: "Despliegue Seguro - FastAPI + Render",
+        subject: "Puesta en Producción Segura",
+        shortSubject: "Producción",
+        tags: ["FastAPI", "Supabase", "OAuth2", "JWT", "RBAC", "ABAC", "DAST", "OWASP ZAP", "Render", "CI/CD"],
+        difficulty: "Hard",
+        type: "md",
+        content: "Puesta en Produccion Segura/Despliegue seguro de aplicacion web/README.md",
+        image: "Puesta en Produccion Segura/Despliegue seguro de aplicacion web/docs/img/14c-zap-summary-post.png",
+        description: "Clínica Veterinaria — ciclo completo de puesta en producción segura: OAuth2/JWT, RBAC+ABAC, SCA, DAST con OWASP ZAP y despliegue en Render"
     }
 ];
 
