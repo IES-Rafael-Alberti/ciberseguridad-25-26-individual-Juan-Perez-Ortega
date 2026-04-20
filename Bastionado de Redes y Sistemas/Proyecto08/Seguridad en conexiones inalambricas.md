@@ -44,3 +44,5 @@ Una de las razones principales para elegir el TP-Link Archer C6 es su interfaz d
 
 Con los 12 pasos aplicados, el TP-Link Archer C6 pasa de su configuración de fábrica (vulnerable por defecto) a un estado bastionado que cubre los principales vectores de ataque en redes inalámbricas: acceso no autorizado, cifrado débil, servicios innecesarios expuestos y falta de visibilidad. Ninguna configuración es infalible, pero combinando estas medidas con un mantenimiento periódico se reduce drásticamente la superficie de ataque del router.
 
+
+

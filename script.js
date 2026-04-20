@@ -68,6 +68,18 @@ const ARCHIVE_DB = [
         image: "Bastionado de Redes y Sistemas/Proyecto08/img/Paso00-DashboardPrincipal.png",
         description: "Seguridad en conexiones inalámbricas"
     },
+    {
+        id: 23,
+        title: "Wazuh - SIEM & XDR",
+        subject: "Bastionado de Redes y Sistemas",
+        shortSubject: "Bastionado",
+        tags: ["wazuh", "SIEM", "XDR", "agente", "dashboard", "monitoreo"],
+        difficulty: "Hard",
+        type: "md",
+        content: "Bastionado de Redes y Sistemas/Wazuh/README.md",
+        image: "Bastionado de Redes y Sistemas/Wazuh/img/08_dashboard_overview_principal.png",
+        description: "Instalación de Wazuh Server y registro de agente en cliente"
+    },
 
     // === INCIDENTES EN CIBERSEGURIDAD ===
     {
