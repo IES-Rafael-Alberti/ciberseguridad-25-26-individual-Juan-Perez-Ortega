@@ -77,6 +77,38 @@ Los formularios validan en cliente antes de enviar: formato de email, longitud m
 
 ---
 
+## 📸 Capturas de la app
+
+### Configuración del entorno
+![Android Studio Setup](docs/img/01-android-studio-setup.png)
+
+### Autenticación
+| Login | Registro |
+|---|---|
+| ![Login](docs/img/02-login.png) | ![Registro](docs/img/03-register.png) |
+
+### Tienda con descuento ABAC
+| Lista de productos | Descuento activo | Popup de precio |
+|---|---|---|
+| ![Tienda](docs/img/05-tienda.png) | ![Tienda con descuento](docs/img/09-tienda-descuento.png) | ![Popup descuento](docs/img/10-descuento-popup.png) |
+
+El 20% de descuento solo aparece si el usuario ha adoptado una mascota (control ABAC del backend).
+
+### Adopciones
+| Lista de mascotas | Confirmación | Adopción completada |
+|---|---|---|
+| ![Adopciones](docs/img/04-adopciones.png) | ![Confirmación](docs/img/07-adopcion-confirm.png) | ![Éxito](docs/img/08-adopcion-ok.png) |
+
+### Consulta de descuento
+![Descuento](docs/img/06-descuento.png)
+
+### Controles de seguridad aplicados
+| Android Keystore (token cifrado) | AndroidManifest | Network Security Config |
+|---|---|---|
+| ![Secure Storage](docs/img/11-secure-storage.png) | ![Manifest](docs/img/12-android-manifest.png) | ![Network Config](docs/img/13-network-security-config.png) |
+
+---
+
 ## 🔧 Cómo ejecutar
 
 ### Requisitos
