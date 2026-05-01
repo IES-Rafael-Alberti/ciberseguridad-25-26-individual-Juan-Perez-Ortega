@@ -1,0 +1,79 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<suppressions xmlns="https://jeremylong.github.io/DependencyCheck/dependency-suppression.1.3.xsd">
+
+    <!--
+      Todos los casos siguientes son falsos positivos producidos por el analizador
+      experimental Dart/Flutter de OWASP Dependency-Check. El CPE matching asigna
+      CVEs de paquetes npm, Go u otros ecosistemas a paquetes pub.dev que comparten
+      fragmentos de nombre pero no tienen relación con la vulnerabilidad reportada.
+    -->
+
+    <!-- CVE-2021-43138: afecta al paquete npm "async", no al paquete Dart "fake_async" -->
+    <suppress>
+        <notes>False positive: CVE-2021-43138 afecta al paquete npm async (camel-case RCE).
+        El paquete Dart fake_async es un simulador de temporizadores para tests y no
+        comparte código ni vulnerabilidad con el paquete npm.</notes>
+        <packageUrl regex="true">^pkg:pub/fake_async.*$</packageUrl>
+        <cve>CVE-2021-43138</cve>
+    </suppress>
+
+    <!-- CVE-2022-3095: afecta a hashicorp/go-getter (Go), no a flutter_secure_storage -->
+    <suppress>
+        <notes>False positive: CVE-2022-3095 afecta a hashicorp/go-getter (path traversal en Go).
+        Los paquetes flutter_secure_storage_* son wrappers de Dart sobre Android Keystore /
+        iOS Keychain y no tienen relación con hashicorp/go-getter.</notes>
+        <packageUrl regex="true">^pkg:pub/flutter_secure_storage.*$</packageUrl>
+        <cve>CVE-2022-3095</cve>
+    </suppress>
+
+    <!-- CVE-2022-3095 en paquetes Flutter genéricos (jni_flutter, leak_tracker_flutter_testing) -->
+    <suppress>
+        <notes>False positive: CVE-2022-3095 afecta a hashicorp/go-getter, no a paquetes Flutter.</notes>
+        <packageUrl regex="true">^pkg:pub/jni_flutter.*$</packageUrl>
+        <cve>CVE-2022-3095</cve>
+    </suppress>
+    <suppress>
+        <notes>False positive: CVE-2022-3095 afecta a hashicorp/go-getter, no a paquetes Flutter.</notes>
+        <packageUrl regex="true">^pkg:pub/leak_tracker_flutter_testing.*$</packageUrl>
+        <cve>CVE-2022-3095</cve>
+    </suppress>
+
+    <!-- CVE-2021-20291: afecta a containers/storage (Go), no a flutter_secure_storage -->
+    <suppress>
+        <notes>False positive: CVE-2021-20291 afecta a containers/storage (Go deadlock).
+        No tiene relación con flutter_secure_storage de Dart.</notes>
+        <packageUrl regex="true">^pkg:pub/flutter_secure_storage.*$</packageUrl>
+        <cve>CVE-2021-20291</cve>
+    </suppress>
+
+    <!-- CVE-2023-26105: afecta al paquete npm "flat", no a material_color_utilities -->
+    <suppress>
+        <notes>False positive: CVE-2023-26105 afecta al paquete npm flat (prototype pollution).
+        material_color_utilities es una librería Dart de utilidades de color de Material Design.</notes>
+        <packageUrl regex="true">^pkg:pub/material_color_utilities.*$</packageUrl>
+        <cve>CVE-2023-26105</cve>
+    </suppress>
+
+    <!-- CVE-2017-16116: afecta al paquete npm "string", no a string_scanner de Dart -->
+    <suppress>
+        <notes>False positive: CVE-2017-16116 afecta al paquete npm string (ReDoS).
+        string_scanner es un escáner de cadenas para el parser de Dart y no comparte
+        código con el paquete npm.</notes>
+        <packageUrl regex="true">^pkg:pub/string_scanner.*$</packageUrl>
+        <cve>CVE-2017-16116</cve>
+    </suppress>
+
+    <!-- CVE-2026-27704: falso positivo genérico sobre el SDK de Dart y paquetes Flutter -->
+    <suppress>
+        <notes>False positive: CVE-2026-27704 no corresponde a ninguna vulnerabilidad conocida
+        del SDK de Dart ni de los paquetes Flutter afectados. CPE matching incorrecto.</notes>
+        <packageUrl regex="true">^pkg:pub/dart_software_development_kit.*$</packageUrl>
+        <cve>CVE-2026-27704</cve>
+    </suppress>
+    <suppress>
+        <notes>False positive: CVE-2026-27704 — CPE matching incorrecto en paquetes Flutter.</notes>
+        <packageUrl regex="true">^pkg:pub/flutter.*$</packageUrl>
+        <cve>CVE-2026-27704</cve>
+    </suppress>
+
+</suppressions>
