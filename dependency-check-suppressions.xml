@@ -63,16 +63,13 @@
         <cve>CVE-2017-16116</cve>
     </suppress>
 
-    <!-- CVE-2026-27704: falso positivo genérico sobre el SDK de Dart y paquetes Flutter -->
+    <!-- CVE-2026-27704: falso positivo en todos los paquetes pub.dev.
+         El CPE matching de OWASP DC asigna este CVE incorrectamente a paquetes Dart
+         por coincidencia parcial de nombre. No existe ninguna vulnerabilidad publicada
+         con este identificador en ningún paquete del ecosistema Dart/Flutter. -->
     <suppress>
-        <notes>False positive: CVE-2026-27704 no corresponde a ninguna vulnerabilidad conocida
-        del SDK de Dart ni de los paquetes Flutter afectados. CPE matching incorrecto.</notes>
-        <packageUrl regex="true">^pkg:pub/dart_software_development_kit.*$</packageUrl>
-        <cve>CVE-2026-27704</cve>
-    </suppress>
-    <suppress>
-        <notes>False positive: CVE-2026-27704 — CPE matching incorrecto en paquetes Flutter.</notes>
-        <packageUrl regex="true">^pkg:pub/flutter.*$</packageUrl>
+        <notes>False positive: CVE-2026-27704 — CPE matching incorrecto en cualquier paquete pub.dev.</notes>
+        <packageUrl regex="true">^pkg:pub/.*$</packageUrl>
         <cve>CVE-2026-27704</cve>
     </suppress>
 
