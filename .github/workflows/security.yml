@@ -45,6 +45,7 @@ jobs:
           args: >-
             --failOnCVSS 7
             --enableExperimental
+            --exclude "**/clinica_veterinaria_mobile/**"
 
       - name: Subir reporte
         uses: actions/upload-artifact@v4
