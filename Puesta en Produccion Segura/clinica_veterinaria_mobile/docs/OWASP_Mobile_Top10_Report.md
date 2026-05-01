@@ -295,12 +295,55 @@ Los dos puntos pendientes para una versión de producción real son:
 - **M2**: Añadir pipeline de SCA automático para dependencias Dart/Flutter (equivalente al OWASP Dependency-Check de la parte web).
 - **M7**: Implementar detección de root (`flutter_jailbreak_detection`) y verificación de integridad con Google Play Integrity API.
 
+## Resultados DAST — OWASP ZAP
+
+Se ha ejecutado un análisis dinámico con **OWASP ZAP 2.17.0** interceptando el tráfico HTTPS real entre la app y la API. ZAP actúa como proxy MITM: el cliente Dio está configurado en modo debug para enrutar por `10.0.2.2:8090`, y el certificado CA de ZAP está instalado en el emulador como CA de usuario (confiado vía `<debug-overrides>` en `network_security_config.xml`).
+
+**Herramienta:** OWASP ZAP 2.17.0 (Docker)  
+**Informe PDF completo:** `docs/ZAP_DAST_Report.pdf`
+
+![ZAP Traffic](img/16-zap-dast-traffic.png)
+
+### Tráfico interceptado
+
+| Endpoint | Resultado |
+|---|---|
+| `POST /token` | JWT devuelto correctamente sobre HTTPS |
+| `GET /tienda/productos` | 200 OK — datos JSON cifrados en tránsito |
+| `GET /mascotas` | 200 OK — datos JSON cifrados en tránsito |
+| `POST /adopciones` | 200 OK — query param `mascota_id` sobre HTTPS |
+
+### Hallazgos
+
+![ZAP Alerts](img/17-zap-dast-alerts.png)
+
+| Severidad | Hallazgo | Endpoints | Mitigación |
+|---|---|---|---|
+| Informational | Re-examine Cache-control Directives | `/tienda/productos`, `/mascotas` | Añadir `Cache-Control: no-store` en el backend FastAPI |
+
+**0 vulnerabilidades HIGH, MEDIUM o LOW.** ZAP no detectó inyección SQL, XSS, tokens expuestos en claro, ni autenticación bypasseable. Todo el tráfico va cifrado sobre TLS 1.3.
+
+---
+
+## Conclusiones
+
+La app cumple con los controles fundamentales del OWASP MASVS: comunicación cifrada, almacenamiento seguro de credenciales, autenticación robusta, configuración mínima de permisos y sin secretos en el código.
+
+El análisis SAST con MobSF sobre el APK de debug obtuvo un **Security Score de 39/100**. Este score refleja principalmente que el APK analizado es de desarrollo (debuggable=true y certificado de debug), no problemas reales de seguridad en el código de la aplicación. Los controles de red obtuvieron estado **SECURE**, no se detectaron trackers (0/432) y los permisos son mínimos (solo INTERNET).
+
+El análisis DAST con ZAP confirma que **no hay vulnerabilidades activas**: todo el tráfico va cifrado, los tokens JWT viajan en la cabecera `Authorization` y no en la URL, y no se detectaron patrones de ataque conocidos.
+
+Los dos puntos pendientes para una versión de producción real son:
+- **M2**: Añadir pipeline de SCA automático para dependencias Dart/Flutter.
+- **M7**: Implementar detección de root (`flutter_jailbreak_detection`) y verificación de integridad con Google Play Integrity API.
+
 El ciclo completo de seguridad aplicado:
 
 ```
 Desarrollo seguro (MASVS) 
     → SAST con MobSF → Security Score 39/100 (debug APK)
                       → 0 trackers, red SECURE, 1 permiso
-    → DAST con ZAP proxy (análisis dinámico en emulador)
+    → DAST con ZAP  → 0 HIGH/MEDIUM/LOW
+                    → Tráfico HTTPS interceptado y verificado
     → Informe Mobile Top 10 (este documento)
 ```

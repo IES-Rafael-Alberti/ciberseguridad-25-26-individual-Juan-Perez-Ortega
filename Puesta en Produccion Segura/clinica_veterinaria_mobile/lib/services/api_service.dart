@@ -1,4 +1,7 @@
+import 'dart:io';
 import 'package:dio/dio.dart';
+import 'package:dio/io.dart';
+import 'package:flutter/foundation.dart';
 import '../config/api_config.dart';
 import '../utils/secure_storage.dart';
 
@@ -18,6 +21,17 @@ class ApiService {
         headers: {'Content-Type': 'application/json'},
       ),
     );
+
+    // Solo en debug: redirige tráfico a ZAP (10.0.2.2:8090) para análisis DAST.
+    // En release este bloque no compila (kDebugMode = false).
+    if (kDebugMode) {
+      (_dio.httpClientAdapter as IOHttpClientAdapter).createHttpClient = () {
+        final client = HttpClient();
+        client.findProxy = (uri) => 'PROXY 10.0.2.2:8090';
+        client.badCertificateCallback = (cert, host, port) => true;
+        return client;
+      };
+    }
 
     // Interceptor: adjunta Bearer token y limpia sesión si expira (401).
     _dio.interceptors.add(

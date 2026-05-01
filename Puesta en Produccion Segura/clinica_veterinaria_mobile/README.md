@@ -142,13 +142,43 @@ El score de 39/100 se debe casi en su totalidad a que el APK analizado es de **d
 El informe PDF completo está en [`docs/MobSF_SAST_Report.pdf`](docs/MobSF_SAST_Report.pdf).  
 El análisis detallado de cada riesgo está en [`docs/OWASP_Mobile_Top10_Report.md`](docs/OWASP_Mobile_Top10_Report.md).
 
-### DAST — Proxy ZAP
-Para el análisis dinámico se configura OWASP ZAP como proxy HTTP/HTTPS en el emulador, se navega por la app y ZAP registra todas las peticiones para analizarlas.
+### DAST — OWASP ZAP
 
+ZAP intercepta el tráfico HTTPS entre la app y la API actuando como proxy MITM. Para ello se configura el cliente Dio para enrutar las peticiones por ZAP en modo debug, se instala el certificado CA de ZAP en el emulador y se navega por todas las pantallas.
+
+```bash
+# Levantar ZAP en Docker como proxy en el puerto 8090
+docker run -d --name zap -p 8090:8090 ghcr.io/zaproxy/zaproxy:stable \
+  zap.sh -daemon -host 0.0.0.0 -port 8090 -config api.disablekey=true
+
+# Exportar el certificado CA de ZAP e instalarlo en el emulador
+curl http://localhost:8090/OTHER/core/other/rootcert/ > zap_ca.cer
+adb push zap_ca.cer /sdcard/zap_ca.cer
+# Instalar desde Settings → Security → Encryption & credentials → Install CA cert
 ```
-Configuración del emulador:
-Ajustes → WiFi → Proxy manual → 10.0.2.2:8080 (IP del host desde el emulador)
-```
+
+**Tráfico capturado:**
+
+![ZAP DAST Traffic](docs/img/16-zap-dast-traffic.png)
+
+| Endpoint | Método | Respuesta |
+|---|---|---|
+| `/tienda/productos` | GET | 200 OK (JSON) |
+| `/mascotas` | GET | 200 OK (JSON) |
+| `/token` | POST | 200 OK (JWT) |
+| `/adopciones` | POST | 200 OK |
+
+**Hallazgos:**
+
+![ZAP DAST Alerts](docs/img/17-zap-dast-alerts.png)
+
+| Severidad | Hallazgo | Endpoints afectados |
+|---|---|---|
+| Informational | Re-examine Cache-control Directives | `/tienda/productos`, `/mascotas` |
+
+**0 vulnerabilidades HIGH, MEDIUM o LOW detectadas.** El único hallazgo es informativo: los endpoints de la API no devuelven cabecera `Cache-Control`. Para producción se añadiría `no-cache, no-store` en las respuestas del backend FastAPI.
+
+El informe PDF completo está en [`docs/ZAP_DAST_Report.pdf`](docs/ZAP_DAST_Report.pdf).
 
 ---
 

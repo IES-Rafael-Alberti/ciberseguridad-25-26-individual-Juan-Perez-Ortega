@@ -289,6 +289,18 @@ const ARCHIVE_DB = [
         content: "Puesta en Produccion Segura/Despliegue seguro de aplicacion web/README.md",
         image: "Puesta en Produccion Segura/Despliegue seguro de aplicacion web/docs/img/14c-zap-summary-post.png",
         description: "Clínica Veterinaria — ciclo completo de puesta en producción segura: OAuth2/JWT, RBAC+ABAC, SCA, DAST con OWASP ZAP y despliegue en Render"
+    },
+    {
+        id: 23,
+        title: "App Móvil Segura - Flutter + MASVS",
+        subject: "Puesta en Producción Segura",
+        shortSubject: "Producción",
+        tags: ["Flutter", "Android", "OWASP MASVS", "OWASP Mobile Top 10", "MobSF", "SAST", "DAST", "ZAP", "JWT", "ABAC"],
+        difficulty: "Hard",
+        type: "md",
+        content: "Puesta en Produccion Segura/clinica_veterinaria_mobile/README.md",
+        image: "Puesta en Produccion Segura/clinica_veterinaria_mobile/docs/img/14-mobsf-sast-summary.png",
+        description: "App móvil Flutter para Clínica Veterinaria con OWASP MASVS, Android Keystore, HTTPS forzado, SAST con MobSF y DAST con ZAP"
     }
 ];
 

@@ -17,4 +17,12 @@
         </pin-set>
         -->
     </domain-config>
+    <!-- Solo en builds de debug: confía también en certificados instalados por el usuario
+         (necesario para interceptar tráfico HTTPS con ZAP en el emulador) -->
+    <debug-overrides>
+        <trust-anchors>
+            <certificates src="system"/>
+            <certificates src="user"/>
+        </trust-anchors>
+    </debug-overrides>
 </network-security-config>
