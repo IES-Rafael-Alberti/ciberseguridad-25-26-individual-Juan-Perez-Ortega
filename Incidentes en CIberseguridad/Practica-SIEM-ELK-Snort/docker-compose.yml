@@ -1,0 +1,147 @@
+name: siem-lab
+
+# =============================================================
+# Fase 1: Elasticsearch + Kibana
+# Fase 2: + Snort 3 (build local)
+# Fase 3: + Logstash + Filebeat (dentro del contenedor Snort)
+# =============================================================
+
+services:
+
+  # -----------------------------------------------------------
+  # ELASTICSEARCH — Motor de indexación y búsqueda
+  # -----------------------------------------------------------
+  elasticsearch:
+    image: docker.elastic.co/elasticsearch/elasticsearch:${ELASTIC_VERSION}
+    container_name: elasticsearch
+    hostname: elasticsearch
+    environment:
+      - cluster.name=siem-cluster
+      - node.name=es-node-1
+      - discovery.type=single-node
+      - bootstrap.memory_lock=false
+      - xpack.security.enabled=false
+      - xpack.security.http.ssl.enabled=false
+      - xpack.security.transport.ssl.enabled=false
+      - ES_JAVA_OPTS=${ES_JAVA_OPTS}
+    ulimits:
+      nofile:
+        soft: 65536
+        hard: 65536
+    volumes:
+      - es-data:/usr/share/elasticsearch/data
+    ports:
+      - "${ES_PORT}:9200"
+    networks:
+      siem-net:
+        ipv4_address: ${ES_IP}
+    healthcheck:
+      test: ["CMD-SHELL", "curl -fs http://localhost:9200 >/dev/null || exit 1"]
+      interval: 10s
+      timeout: 10s
+      retries: 30
+      start_period: 60s
+    restart: unless-stopped
+
+  # -----------------------------------------------------------
+  # KIBANA — Interfaz gráfica de visualización
+  # -----------------------------------------------------------
+  kibana:
+    image: docker.elastic.co/kibana/kibana:${ELASTIC_VERSION}
+    container_name: kibana
+    hostname: kibana
+    depends_on:
+      elasticsearch:
+        condition: service_healthy
+    environment:
+      - SERVER_NAME=kibana
+      - ELASTICSEARCH_HOSTS=http://elasticsearch:9200
+      - SERVER_PUBLICBASEURL=http://localhost:${KIBANA_PORT}
+      - XPACK_SECURITY_ENABLED=false
+      - TELEMETRY_ENABLED=false
+    ports:
+      - "${KIBANA_PORT}:5601"
+    networks:
+      siem-net:
+        ipv4_address: ${KIBANA_IP}
+    healthcheck:
+      test: ["CMD-SHELL", "curl -fs http://localhost:5601/api/status >/dev/null || exit 1"]
+      interval: 10s
+      timeout: 10s
+      retries: 30
+      start_period: 90s
+    restart: unless-stopped
+
+  # -----------------------------------------------------------
+  # LOGSTASH — Pipeline de enriquecimiento y normalización
+  # (activo desde Fase 3)
+  # -----------------------------------------------------------
+  logstash:
+    image: docker.elastic.co/logstash/logstash:${ELASTIC_VERSION}
+    container_name: logstash
+    hostname: logstash
+    depends_on:
+      elasticsearch:
+        condition: service_healthy
+    environment:
+      - LS_JAVA_OPTS=${LS_JAVA_OPTS}
+      - XPACK_MONITORING_ENABLED=false
+    volumes:
+      - ./logstash/pipeline:/usr/share/logstash/pipeline:ro
+    ports:
+      - "${LOGSTASH_BEATS_PORT}:5044"
+    networks:
+      siem-net:
+        ipv4_address: ${LOGSTASH_IP}
+    healthcheck:
+      test: ["CMD-SHELL", "curl -fs http://localhost:9600 >/dev/null || exit 1"]
+      interval: 15s
+      timeout: 10s
+      retries: 20
+      start_period: 90s
+    restart: unless-stopped
+    profiles:
+      - fase3
+
+  # -----------------------------------------------------------
+  # SNORT 3 — Sensor IDS (imagen construida localmente)
+  # (activo desde Fase 2)
+  # -----------------------------------------------------------
+  snort:
+    build:
+      context: ./snort
+      dockerfile: Dockerfile
+    container_name: snort
+    hostname: snort
+    depends_on:
+      logstash:
+        condition: service_healthy
+    network_mode: host
+    cap_add:
+      - NET_ADMIN
+      - NET_RAW
+    volumes:
+      - snort-logs:/var/log/snort
+    restart: unless-stopped
+    profiles:
+      - fase2
+
+# -----------------------------------------------------------
+# Volúmenes nombrados — datos persistentes entre reinicios
+# -----------------------------------------------------------
+volumes:
+  es-data:
+    driver: local
+  snort-logs:
+    driver: local
+
+# -----------------------------------------------------------
+# Red interna con direccionamiento estático
+# -----------------------------------------------------------
+networks:
+  siem-net:
+    name: siem-net
+    driver: bridge
+    ipam:
+      config:
+        - subnet: ${SIEM_SUBNET}

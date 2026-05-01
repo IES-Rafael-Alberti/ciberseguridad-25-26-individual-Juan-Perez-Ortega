@@ -1,0 +1,26 @@
+name: clinica_veterinaria_mobile
+description: App móvil de cliente para Clínica Veterinaria — Flutter + OWASP MASVS
+publish_to: 'none'
+version: 1.0.0+1
+
+environment:
+  sdk: '>=3.3.0 <4.0.0'
+
+dependencies:
+  flutter:
+    sdk: flutter
+  # MASVS-STORAGE-1: almacena tokens en Android Keystore / iOS Keychain
+  flutter_secure_storage: ^9.2.2
+  # Cliente HTTP con interceptores (adjunta Bearer token, maneja 401)
+  dio: ^5.7.0
+  # Gestión de estado reactiva
+  provider: ^6.1.2
+  cupertino_icons: ^1.0.8
+
+dev_dependencies:
+  flutter_test:
+    sdk: flutter
+  flutter_lints: ^4.0.0
+
+flutter:
+  uses-material-design: true

@@ -1,0 +1,9 @@
+# Datos persistentes de Docker (volúmenes montados localmente si los hay)
+data/
+
+# Capturas temporales
+*.tmp
+
+# Secretos — nunca subir al repo
+.env.local
+.env.production

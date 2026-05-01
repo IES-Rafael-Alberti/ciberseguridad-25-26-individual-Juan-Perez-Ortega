@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+  MASVS-NETWORK-1: deshabilita tráfico en claro para todo el dominio.
+  MASVS-NETWORK-2: certificate pinning — descomentar la sección <pin-set>
+    y sustituir el placeholder con el hash SHA-256 real del certificado
+    de onrender.com (obtenible con: openssl s_client -connect
+    clinica-veterinaria-rxnp.onrender.com:443 | openssl x509 -pubkey -noout |
+    openssl pkey -pubin -outform der | openssl dgst -sha256 -binary | base64)
+-->
+<network-security-config>
+    <domain-config cleartextTrafficPermitted="false">
+        <domain includeSubdomains="false">clinica-veterinaria-rxnp.onrender.com</domain>
+        <!--
+        <pin-set expiration="2027-01-01">
+            <pin digest="SHA-256">HASH_CERTIFICADO_PRINCIPAL_EN_BASE64==</pin>
+            <pin digest="SHA-256">HASH_CERTIFICADO_BACKUP_EN_BASE64==</pin>
+        </pin-set>
+        -->
+    </domain-config>
+</network-security-config>
