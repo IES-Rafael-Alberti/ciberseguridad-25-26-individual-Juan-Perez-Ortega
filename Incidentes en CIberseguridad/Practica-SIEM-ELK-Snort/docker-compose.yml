@@ -1,58 +1,54 @@
 name: siem-lab
 
-# =============================================================
-# Fase 1: Elasticsearch + Kibana
-# Fase 2: + Snort 3 (build local)
-# Fase 3: + Logstash + Filebeat (dentro del contenedor Snort)
-# =============================================================
-
 services:
 
-  # -----------------------------------------------------------
-  # ELASTICSEARCH — Motor de indexación y búsqueda
-  # -----------------------------------------------------------
+  # ============================================================
+  # ELASTICSEARCH — Motor de indexación y búsqueda de alertas
+  # Acceso: http://localhost:9200
+  # ============================================================
   elasticsearch:
     image: docker.elastic.co/elasticsearch/elasticsearch:${ELASTIC_VERSION}
     container_name: elasticsearch
     hostname: elasticsearch
     environment:
-      - cluster.name=siem-cluster
-      - node.name=es-node-1
-      - discovery.type=single-node
+      - cluster.name=siem-cluster # Nombre del clúster
+      - node.name=es-node-1 # Nombre del nodo
+      - discovery.type=single-node # Modo nodo único (lab)
       - bootstrap.memory_lock=false
-      - xpack.security.enabled=false
+      - xpack.security.enabled=false # Sin TLS (entorno aislado)
       - xpack.security.http.ssl.enabled=false
       - xpack.security.transport.ssl.enabled=false
-      - ES_JAVA_OPTS=${ES_JAVA_OPTS}
+      - ES_JAVA_OPTS=${ES_JAVA_OPTS} # Heap JVM desde .env
     ulimits:
       nofile:
         soft: 65536
         hard: 65536
     volumes:
-      - es-data:/usr/share/elasticsearch/data
+      - es-data:/usr/share/elasticsearch/data # Datos persistentes
     ports:
-      - "${ES_PORT}:9200"
+      - "${ES_PORT}:9200" # Puerto expuesto al host
     networks:
       siem-net:
-        ipv4_address: ${ES_IP}
+        ipv4_address: ${ES_IP} # IP fija 172.30.0.10
     healthcheck:
-      test: ["CMD-SHELL", "curl -fs http://localhost:9200 >/dev/null || exit 1"]
+      test: [ "CMD-SHELL", "curl -fs http://localhost:9200 >/dev/null || exit 1" ]
       interval: 10s
       timeout: 10s
       retries: 30
       start_period: 60s
     restart: unless-stopped
 
-  # -----------------------------------------------------------
-  # KIBANA — Interfaz gráfica de visualización
-  # -----------------------------------------------------------
+  # ============================================================
+  # KIBANA — Interfaz gráfica de visualización del SIEM
+  # Acceso: http://localhost:5601
+  # ============================================================
   kibana:
     image: docker.elastic.co/kibana/kibana:${ELASTIC_VERSION}
     container_name: kibana
     hostname: kibana
     depends_on:
       elasticsearch:
-        condition: service_healthy
+        condition: service_healthy # Espera a que ES esté listo
     environment:
       - SERVER_NAME=kibana
       - ELASTICSEARCH_HOSTS=http://elasticsearch:9200
@@ -60,22 +56,23 @@ services:
       - XPACK_SECURITY_ENABLED=false
       - TELEMETRY_ENABLED=false
     ports:
-      - "${KIBANA_PORT}:5601"
+      - "${KIBANA_PORT}:5601" # Puerto expuesto al host
     networks:
       siem-net:
-        ipv4_address: ${KIBANA_IP}
+        ipv4_address: ${KIBANA_IP} # IP fija 172.30.0.11
     healthcheck:
-      test: ["CMD-SHELL", "curl -fs http://localhost:5601/api/status >/dev/null || exit 1"]
+      test: [ "CMD-SHELL", "curl -fs http://localhost:5601/api/status >/dev/null || exit 1" ]
       interval: 10s
       timeout: 10s
       retries: 30
       start_period: 90s
     restart: unless-stopped
 
-  # -----------------------------------------------------------
-  # LOGSTASH — Pipeline de enriquecimiento y normalización
-  # (activo desde Fase 3)
-  # -----------------------------------------------------------
+  # ============================================================
+  # LOGSTASH — Pipeline de normalización de alertas
+  # Recibe de Filebeat (5044) y envía a Elasticsearch
+  # Se activa en Fase 3: docker compose --profile fase3 up -d
+  # ============================================================
   logstash:
     image: docker.elastic.co/logstash/logstash:${ELASTIC_VERSION}
     container_name: logstash
@@ -87,57 +84,74 @@ services:
       - LS_JAVA_OPTS=${LS_JAVA_OPTS}
       - XPACK_MONITORING_ENABLED=false
     volumes:
-      - ./logstash/pipeline:/usr/share/logstash/pipeline:ro
+      - ./logstash/pipeline:/usr/share/logstash/pipeline:ro # Pipeline en modo lectura
     ports:
-      - "${LOGSTASH_BEATS_PORT}:5044"
+      - "${LOGSTASH_BEATS_PORT}:5044" # Puerto para recibir Filebeat
     networks:
       siem-net:
-        ipv4_address: ${LOGSTASH_IP}
+        ipv4_address: ${LOGSTASH_IP} # IP fija 172.30.0.12
     healthcheck:
-      test: ["CMD-SHELL", "curl -fs http://localhost:9600 >/dev/null || exit 1"]
+      test: [ "CMD-SHELL", "curl -fs http://localhost:9600 >/dev/null || exit 1" ]
       interval: 15s
       timeout: 10s
       retries: 20
       start_period: 90s
     restart: unless-stopped
     profiles:
-      - fase3
+      - fase3 # Solo arranca con --profile fase3
 
-  # -----------------------------------------------------------
-  # SNORT 3 — Sensor IDS (imagen construida localmente)
-  # (activo desde Fase 2)
-  # -----------------------------------------------------------
-  snort:
+  # ============================================================
+  # SURICATA — Sensor IDS que detecta tráfico malicioso
+  # Genera alertas en /var/log/suricata/eve.json (formato JSON)
+  # Se activa en Fase 2: docker compose --profile fase2 up -d
+  # ============================================================
+  suricata:
     build:
       context: ./snort
-      dockerfile: Dockerfile
-    container_name: snort
-    hostname: snort
-    depends_on:
-      logstash:
-        condition: service_healthy
-    network_mode: host
+      dockerfile: Dockerfile # Imagen construida localmente
+    container_name: suricata
+    hostname: suricata
     cap_add:
-      - NET_ADMIN
+      - NET_ADMIN # Permisos para captura de red
       - NET_RAW
     volumes:
-      - snort-logs:/var/log/snort
+      - suricata-logs:/var/log/suricata # Logs persistentes
+    networks:
+      siem-net:
+        ipv4_address: ${SNORT_IP} # IP fija 172.30.0.20 (objetivo del ataque)
     restart: unless-stopped
     profiles:
-      - fase2
+      - fase2 # Solo arranca con --profile fase2
 
-# -----------------------------------------------------------
-# Volúmenes nombrados — datos persistentes entre reinicios
-# -----------------------------------------------------------
+  # ============================================================
+  # KALI — Contenedor atacante para simular los ataques
+  # Se activa en Fase 5: docker compose --profile fase5 up -d
+  # ============================================================
+  kali:
+    image: kalilinux/kali-rolling
+    container_name: kali-attacker
+    hostname: kali-attacker
+    networks:
+      siem-net:
+        ipv4_address: 172.30.0.100 # IP fija del atacante
+    command: tail -f /dev/null # Mantiene el contenedor vivo
+    restart: unless-stopped
+    profiles:
+      - fase5 # Solo arranca con --profile fase5
+
+# ============================================================
+# VOLÚMENES — Datos persistentes entre reinicios
+# ============================================================
 volumes:
   es-data:
-    driver: local
-  snort-logs:
-    driver: local
+    driver: local # Índices de Elasticsearch
+  suricata-logs:
+    driver: local # Alertas EVE JSON de Suricata
 
-# -----------------------------------------------------------
-# Red interna con direccionamiento estático
-# -----------------------------------------------------------
+# ============================================================
+# RED — Bridge interno con IPs estáticas
+# Subred: 172.30.0.0/24
+# ============================================================
 networks:
   siem-net:
     name: siem-net

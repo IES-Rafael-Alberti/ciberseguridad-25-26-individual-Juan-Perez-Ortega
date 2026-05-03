@@ -4,7 +4,8 @@
       "WebFetch(domain:routersecurity.org)",
       "WebSearch",
       "WebFetch(domain:emulator.tp-link.com)",
-      "WebFetch(domain:www.tp-link.com)"
+      "WebFetch(domain:www.tp-link.com)",
+      "PowerShell(docker exec suricata bash -c \"ss -tn | grep 5044\")"
     ]
   }
 }

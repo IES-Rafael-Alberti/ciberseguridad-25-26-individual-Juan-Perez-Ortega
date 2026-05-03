@@ -1,64 +1,121 @@
-# Práctica SIEM — ELK Stack 8 + Snort 3
+# Práctica SIEM con ELK Stack y Suricata IDS
 
-**Autor:** Juan Pérez Ortega
-**Módulo:** Incidentes en Ciberseguridad
-
-SIEM independiente con Elastic Stack 8.15.3 y Snort 3 desplegado con Docker Compose.
+**Módulo:** Incidentes en Ciberseguridad  
+**Alumno:** Juan Pérez Ortega  
 
 ---
 
-## Fase 1 — Elasticsearch + Kibana
+## Índice
 
-Levantamos el núcleo del SIEM: el motor de indexación y la interfaz web.
+1. [Arquitectura](#arquitectura)
+2. [Nota sobre Suricata vs Snort](#nota-sobre-suricata-vs-snort)
+3. [Fase 1 — Infraestructura base (Elasticsearch + Kibana)](#fase-1--infraestructura-base-elasticsearch--kibana)
+4. [Fase 2 — Sensor IDS (Suricata)](#fase-2--sensor-ids-suricata)
+5. [Fase 3 — Pipeline de ingesta (Logstash + Filebeat)](#fase-3--pipeline-de-ingesta-logstash--filebeat)
+6. [Fase 4 — Visualización (Kibana Dashboard)](#fase-4--visualización-kibana-dashboard)
+7. [Fase 5 — Simulación de ataque (Kali + Hydra)](#fase-5--simulación-de-ataque-kali--hydra)
+ 
+---
 
-**Ajuste previo del kernel (obligatorio para Elasticsearch):**
+## Arquitectura
 
-```powershell
-wsl -d docker-desktop -u root sysctl -w vm.max_map_count=262144
+```
+Tráfico de red
+      ↓
+ Suricata IDS          → detecta ICMP(Protocolo de Mensajes de Control de Internet) y fuerza bruta SSH
+      ↓
+  Filebeat             → lee eve.json y envía a Logstash
+      ↓
+  Logstash             → normaliza y filtra solo alertas
+      ↓
+Elasticsearch          → indexa en suricata-YYYY.MM.dd
+      ↓
+   Kibana              → visualiza en dashboard
 ```
 
-**Arrancar los servicios:**
+**Red interna Docker:** `siem-net` — subred `172.30.0.0/24`
+
+| Contenedor    | IP             | Puerto |
+|---------------|----------------|--------|
+| Elasticsearch | 172.30.0.10    | 9200   |
+| Kibana        | 172.30.0.11    | 5601   |
+| Logstash      | 172.30.0.12    | 5044   |
+| Suricata      | 172.30.0.20    | 22     |
+| Kali          | 172.30.0.100   | —      |
+
+---
+
+## Nota sobre Suricata vs Snort
+
+La práctica fue diseñada originalmente con Snort 3, pero `snort3` no está disponible en los repositorios oficiales de Ubuntu 22.04 ni Ubuntu 24.04. Se ha utilizado **Suricata** como alternativa técnicamente superior:
+
+- Suricata es **multihilo** (Snort 2 es monohilo)
+- Genera **EVE JSON nativo**, compatible directamente con Filebeat y Logstash sin parsers adicionales
+- Es el IDS estándar en la industria actualmente, mantenido por la OISF
+- Usa la **misma sintaxis de reglas** que Snort
+
+---
+
+## Fase 1 — Infraestructura base (Elasticsearch + Kibana)
+
+Levantamos Elasticsearch y Kibana sobre un contenedor Docker con una red interna con IPs estáticas.
 
 ```bash
-docker compose up -d elasticsearch kibana
+docker compose up -d
+docker ps -a
+curl.exe http://localhost:9200
 ```
 
-**Verificar que Elasticsearch está operativo:**
-
-Abrir en el navegador → `http://localhost:9200/_cluster/health?pretty`
-
-Debe aparecer `"status": "green"`.
-
-**Acceder a Kibana:**
-
-Abrir en el navegador → `http://localhost:5601`
-
-**Capturas de evidencia:**
-
-![Elasticsearch health](./imagenes/fase1-es-health.png)
-
-![Kibana ready](./imagenes/fase1-kibana-ready.png)
+| Captura | Descripción |
+|---------|-------------|
+| `Imágenes/fase1-docker-up.png` | Contenedores en estado healthy |
+| `Imágenes/fase1-elasticsearch.png` | Elasticsearch respondiendo en localhost:9200 |
+| `Imágenes/fase1-kibana.png` | Kibana accesible en localhost:5601 |
 
 ---
 
-## Fase 2 — Sensor IDS Snort 3
+## Fase 2 — Sensor IDS (Suricata)
 
-> *Pendiente*
+Ahora vamos a construir y arrancar el contenedor Suricata con reglas de detección ICMP y fuerza bruta SSH. Suricata escribe las alertas en `/var/log/suricata/eve.json` en formato EVE JSON (Extensible Event Format) 
+.
+
+**Reglas configuradas (`snort/rules/local.rules`):**
+- ICMP: alerta en cada ping (echo request) hacia la red interna
+- SSH: alerta cuando una misma IP supera 5 conexiones SYN al puerto 22 en 60 segundos
+
+```bash
+# Construir la imagen y arrancar Suricata
+docker compose --profile fase2 up -d --build
+
+# Verificar que Suricata está corriendo
+docker ps
+
+# Lanzar un ping para generar una alerta ICMP
+docker exec -it suricata ping -c 4 172.30.0.10
+
+# Ver las alertas generadas en tiempo real
+docker exec suricata tail -f /var/log/suricata/eve.json
+```
+
+| Captura | Descripción |
+|---------|-------------|
+| `Imágenes/fase2-build-suricata.png` | Build del contenedor Suricata completado |
+| `Imágenes/fase2-alerta-icmp.png` | Alerta ICMP visible en eve.json |
 
 ---
 
-## Fase 3 — Pipeline Logstash + Filebeat
+## Fase 3 — Pipeline de ingesta (Logstash + Filebeat)
 
-> *Pendiente*
-
----
-
-## Fase 4 — Visualización en Kibana
-
-> *Pendiente*
+*(documentación pendiente)*
 
 ---
 
-## Fase 5 — Simulación de ataques reales
+## Fase 4 — Visualización (Kibana Dashboard)
 
-> *Pendiente*
+*(documentación pendiente)*
+
+---
+
+## Fase 5 — Simulación de ataque (Kali + Hydra)
+
+*(documentación pendiente)*

@@ -1,0 +1,102 @@
+%YAML 1.1
+---
+# =============================================================
+# Configuración de Suricata IDS — SIEM Lab
+# =============================================================
+
+vars:
+  address-groups:
+    # HOME_NET: red interna que Suricata considera "nuestra"
+    # Las reglas con $HOME_NET como destino protegen esta red
+    HOME_NET: "[172.30.0.0/24]"
+
+    # EXTERNAL_NET: cualquier IP que no sea nuestra red interna
+    EXTERNAL_NET: "!$HOME_NET"
+
+    # Resto de variables requeridas por Suricata (no las usamos en este lab)
+    HTTP_SERVERS: "$HOME_NET"
+    SMTP_SERVERS: "$HOME_NET"
+    SQL_SERVERS: "$HOME_NET"
+    DNS_SERVERS: "$HOME_NET"
+    TELNET_SERVERS: "$HOME_NET"
+    AIM_SERVERS: "$EXTERNAL_NET"
+    DC_SERVERS: "$HOME_NET"
+    DNP3_SERVER: "$HOME_NET"
+    DNP3_CLIENT: "$HOME_NET"
+    MODBUS_CLIENT: "$HOME_NET"
+    MODBUS_SERVER: "$HOME_NET"
+    ENIP_CLIENT: "$HOME_NET"
+    ENIP_SERVER: "$HOME_NET"
+
+  port-groups:
+    # Puerto SSH: lo usamos en la regla de fuerza bruta
+    SSH_PORTS: 22
+    HTTP_PORTS: "80"
+    SHELLCODE_PORTS: "!80"
+    ORACLE_PORTS: 1521
+    DNP3_PORTS: 20000
+    MODBUS_PORTS: 502
+    FILE_DATA_PORTS: "[$HTTP_PORTS,110,143]"
+    FTP_PORTS: 21
+    VXLAN_PORTS: 4789
+    TEREDO_PORTS: 3544
+
+# Directorio donde Suricata escribirá todos sus logs
+default-log-dir: /var/log/suricata/
+
+# Desactivamos las estadísticas internas (no las necesitamos en el lab)
+stats:
+  enabled: no
+
+outputs:
+  # Desactivamos el formato "fast" (texto plano legacy)
+  - fast:
+      enabled: no
+
+  # Activamos EVE JSON: formato nativo JSON que Filebeat y Logstash
+  # pueden ingerir directamente sin necesidad de parseo adicional
+  - eve-log:
+      enabled: yes
+      filetype: regular
+      filename: eve.json        # → /var/log/suricata/eve.json
+      types:
+        - alert:
+            payload: no         # No incluimos el contenido del paquete
+            packet: no          # No incluimos el paquete en bruto
+            metadata: no        # Sin metadatos extra
+
+# Interfaz de red que Suricata monitorizará
+# eth0 es la interfaz del contenedor en la red siem-net
+pcap:
+  - interface: eth0
+    checksum-checks: auto       # Validación de checksums automática
+
+# Directorio y archivo de reglas personalizadas
+default-rule-path: /etc/suricata/rules
+rule-files:
+  - local.rules                 # Solo cargamos nuestras reglas del lab
+
+# Archivos de configuración adicionales que instala el paquete suricata
+classification-file: /etc/suricata/classification.config
+reference-config-file: /etc/suricata/reference.config
+threshold-file: /etc/suricata/threshold.conf
+
+# Protocolos de capa de aplicación
+# Solo activamos SSH porque es el protocolo que atacamos en el lab
+app-layer:
+  protocols:
+    ssh:
+      enabled: yes              # Necesario para detectar intentos de login SSH
+    tls:
+      enabled: no
+    http:
+      enabled: no
+    ftp:
+      enabled: no
+    smtp:
+      enabled: no
+    dns:
+      tcp:
+        enabled: no
+      udp:
+        enabled: no
