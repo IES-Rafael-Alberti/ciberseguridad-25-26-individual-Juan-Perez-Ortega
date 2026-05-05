@@ -76,7 +76,7 @@ curl.exe http://localhost:9200
 
 ## Fase 2 — Sensor IDS (Suricata)
 
-Ahora vamos a construir y arrancar el contenedor Suricata con reglas de detección ICMP y fuerza bruta SSH. Suricata escribe las alertas en `/var/log/suricata/eve.json` en formato EVE JSON (Extensible Event Format) 
+Ahora vamos a construir y arrancar el contenedor Suricata en donde usamos- reglas de detección ICMP y fuerza bruta SSH. Suricata escribe las alertas en `/var/log/suricata/eve.json` en formato EVE JSON (Extensible Event Format) 
 .
 
 **Reglas configuradas (`snort/rules/local.rules`):**
@@ -106,16 +106,78 @@ docker exec suricata tail -f /var/log/suricata/eve.json
 
 ## Fase 3 — Pipeline de ingesta (Logstash + Filebeat)
 
-*(documentación pendiente)*
+Arrancar Logstash y configurar Filebeat dentro del contenedor Suricata para enviar las alertas EVE JSON a Elasticsearch. El pipeline filtra únicamente eventos de tipo `alert`.
+
+**Flujo:** Filebeat lee `eve.json` → envía a Logstash (puerto 5044) → Logstash normaliza y filtra → Elasticsearch indexa en `suricata-YYYY.MM.dd`
+
+```bash
+# Arrancar Logstash
+docker compose --profile fase3 up -d
+
+# Instalar y arrancar Filebeat dentro del contenedor Suricata
+docker exec -it suricata bash
+
+# (dentro del contenedor)
+curl -k -O https://artifacts.elastic.co/downloads/beats/filebeat/filebeat-8.15.3-linux-x86_64.tar.gz
+tar xzf filebeat-8.15.3-linux-x86_64.tar.gz
+cd filebeat-8.15.3-linux-x86_64
+./filebeat -e &
+
+# Verificar que el índice se ha creado en Elasticsearch
+curl.exe http://localhost:9200/_cat/indices/suricata*?v
+```
+
+| Captura | Descripción |
+|---------|-------------|
+| `Imágenes/fase3-indice-es.png` | Índice `suricata-*` creado en Elasticsearch con documentos |
 
 ---
 
 ## Fase 4 — Visualización (Kibana Dashboard)
 
-*(documentación pendiente)*
+Crear el Data View en Kibana apuntando al índice `suricata-*` y construir un dashboard con dos visualizaciones.
+
+**Pasos en Kibana:**
+1. Stack Management → Data Views → Create data view → patrón `suricata-*`, timestamp `@timestamp`
+2. Discover → seleccionar data view "Suricata Alerts" → verificar alertas
+3. Dashboards → Create dashboard → añadir dos visualizaciones:
+   - **Alertas por Tiempo**: gráfico de barras con `@timestamp` en eje X
+   - **Tipos de Alerta**: gráfico donut con `alert.signature.keyword`
+
+| Captura | Descripción |
+|---------|-------------|
+| `Imágenes/fase4-data-view.png` | Data View `suricata-*` creado con 55 campos |
+| `Imágenes/fase4-discover.png` | Alertas visibles en Discover |
+| `Imágenes/fase4-dashboard.png` | Dashboard con visualizaciones de alertas |
 
 ---
 
 ## Fase 5 — Simulación de ataque (Kali + Hydra)
 
-*(documentación pendiente)*
+Arrancar el contenedor Kali como atacante y simular dos tipos de ataque contra Suricata para validar la detección del SIEM.
+
+```bash
+# Arrancar el contenedor Kali
+docker compose --profile fase5 up -d
+
+# Entrar en Kali
+docker exec -it kali-attacker bash
+
+# Instalar herramientas
+apt-get update && apt-get install -y hydra iputils-ping wordlists
+gunzip /usr/share/wordlists/rockyou.txt.gz
+
+# Ataque 1: ping ICMP (genera alertas sid:1000001)
+ping -c 10 172.30.0.20
+
+# Ataque 2: fuerza bruta SSH con Hydra (genera alertas sid:1000002)
+hydra -l victim -P /usr/share/wordlists/rockyou.txt ssh://172.30.0.20 -t 4 -V
+```
+
+Hydra encuentra la contraseña `victimpass` del usuario `victim` configurado en el contenedor Suricata.
+
+| Captura | Descripción |
+|---------|-------------|
+| `Imágenes/fase5-alerta-icmp-kali.png` | Alertas ICMP desde Kali visibles en Discover |
+| `Imágenes/fase5-alerta-ssh-hydra.png` | Alertas de fuerza bruta SSH en Discover |
+| `Imágenes/fase5-dashboard-final.png` | Dashboard con ambos tipos de alerta |
