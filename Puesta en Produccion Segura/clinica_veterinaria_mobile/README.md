@@ -217,3 +217,9 @@ El informe PDF completo está en [`docs/ZAP_DAST_Report.pdf`](docs/ZAP_DAST_Repo
 ## 📋 Informe OWASP Mobile Top 10
 
 Ver [`docs/OWASP_Mobile_Top10_Report.md`](docs/OWASP_Mobile_Top10_Report.md).
+
+---
+
+## 🔗 Repositorio
+
+[Ver carpeta completa en GitHub](https://github.com/IES-Rafael-Alberti/ciberseguridad-25-26-individual-Juan-Perez-Ortega/tree/main/Puesta%20en%20Produccion%20Segura)
