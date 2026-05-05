@@ -66,11 +66,11 @@ docker ps -a
 curl.exe http://localhost:9200
 ```
 
-![Contenedores en estado healthy](Im%C3%A1genes/fase1-docker-up.png)
+![Contenedores en estado healthy](Imagenes/fase1-docker-up.png)
 
-![Elasticsearch respondiendo en localhost:9200](Im%C3%A1genes/fase1-elasticsearch.png)
+![Elasticsearch respondiendo en localhost:9200](Imagenes/fase1-elasticsearch.png)
 
-![Kibana accesible en localhost:5601](Im%C3%A1genes/fase1-kibana.png)
+![Kibana accesible en localhost:5601](Imagenes/fase1-kibana.png)
 
 ---
 
@@ -96,9 +96,9 @@ docker exec -it suricata ping -c 4 172.30.0.10
 docker exec suricata tail -f /var/log/suricata/eve.json
 ```
 
-![Build del contenedor Suricata completado](Im%C3%A1genes/fase2-build-suricata.png)
+![Build del contenedor Suricata completado](Imagenes/fase2-build-suricata.png)
 
-![Alerta ICMP visible en eve.json](Im%C3%A1genes/fase2-alerta-icmp.png)
+![Alerta ICMP visible en eve.json](Imagenes/fase2-alerta-icmp.png)
 
 ---
 
@@ -125,7 +125,7 @@ cd filebeat-8.15.3-linux-x86_64
 curl.exe http://localhost:9200/_cat/indices/suricata*?v
 ```
 
-![Índice suricata-* creado en Elasticsearch con documentos](Im%C3%A1genes/fase3-indice-es.png)
+![Índice suricata-* creado en Elasticsearch con documentos](Imagenes/fase3-indice-es.png)
 
 ---
 
@@ -140,11 +140,11 @@ Crear el Data View en Kibana apuntando al índice `suricata-*` y construir un da
    - **Alertas por Tiempo**: gráfico de barras con `@timestamp` en eje X
    - **Tipos de Alerta**: gráfico donut con `alert.signature.keyword`
 
-![Data View suricata-* creado con 55 campos](Im%C3%A1genes/fase4-data-view.png)
+![Data View suricata-* creado con 55 campos](Imagenes/fase4-data-view.png)
 
-![Alertas visibles en Discover](Im%C3%A1genes/fase4-discover.png)
+![Alertas visibles en Discover](Imagenes/fase4-discover.png)
 
-![Dashboard con visualizaciones de alertas](Im%C3%A1genes/fase4-dashboard.png)
+![Dashboard con visualizaciones de alertas](Imagenes/fase4-dashboard.png)
 
 ---
 
@@ -172,8 +172,8 @@ hydra -l victim -P /usr/share/wordlists/rockyou.txt ssh://172.30.0.20 -t 4 -V
 
 Hydra encuentra la contraseña `victimpass` del usuario `victim` configurado en el contenedor Suricata.
 
-![Alertas ICMP desde Kali visibles en Discover](Im%C3%A1genes/fase5-alerta-icmp-kali.png)
+![Alertas ICMP desde Kali visibles en Discover](Imagenes/fase5-alerta-icmp-kali.png)
 
-![Alertas de fuerza bruta SSH en Discover](Im%C3%A1genes/fase5-alerta-ssh-hydra.png)
+![Alertas de fuerza bruta SSH en Discover](Imagenes/fase5-alerta-ssh-hydra.png)
 
-![Dashboard con ambos tipos de alerta](Im%C3%A1genes/fase5-dashboard-final.png)
+![Dashboard con ambos tipos de alerta](Imagenes/fase5-dashboard-final.png)
