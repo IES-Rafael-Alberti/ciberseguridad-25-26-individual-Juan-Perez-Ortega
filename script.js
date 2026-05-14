@@ -64,7 +64,7 @@ const ARCHIVE_DB = [
         tags: ["wifi", "WPA", "router", "firewall", "wireless"],
         difficulty: "Medium",
         type: "md",
-        content: "Bastionado de Redes y Sistemas/Proyecto08/Seguridad en conexiones invisibles.md",
+        content: "Bastionado de Redes y Sistemas/Proyecto08/Seguridad en conexiones inalambricas.md",
         image: "Bastionado de Redes y Sistemas/Proyecto08/img/Paso00-DashboardPrincipal.png",
         description: "Seguridad en conexiones inalámbricas"
     },
@@ -90,8 +90,8 @@ const ARCHIVE_DB = [
         tags: ["SIEM", "elasticsearch", "kibana", "logs"],
         difficulty: "Hard",
         type: "pdf",
-        content: "Incidentes en CIberseguridad/JPO2b02.pdf",
-        image: "Incidentes en CIberseguridad/imagenesSIEM/Elasticsearch.png",
+        content: "Incidentes en CIberseguridad/EL primer ELK/JPO2b02.pdf",
+        image: "Incidentes en CIberseguridad/EL primer ELK/imagenesSIEM/Elasticsearch.png",
         description: "Implementación de SIEM con Elasticsearch"
     },
     {
@@ -103,7 +103,7 @@ const ARCHIVE_DB = [
         difficulty: "Easy",
         type: "md",
         content: "Incidentes en CIberseguridad/2526-u2-2-5-reflexionyresumen-Juan-Perez-Ortega/RESPUESTAS.md",
-        image: "Incidentes en CIberseguridad/imagenesSIEM/Kibana.png",
+        image: "Incidentes en CIberseguridad/EL primer ELK/imagenesSIEM/Kibana.png",
         description: "Reflexión sobre gestión de incidentes"
     },
     {
@@ -115,7 +115,7 @@ const ARCHIVE_DB = [
         difficulty: "Medium",
         type: "md",
         content: "Incidentes en CIberseguridad/2526-u3-3-1-recopilaalmacenaanalisis-grupo-4_2526/README.md",
-        image: "Incidentes en CIberseguridad/imagenesSIEM/KibanaAlertaAtaque.png",
+        image: "Incidentes en CIberseguridad/EL primer ELK/imagenesSIEM/KibanaAlertaAtaque.png",
         description: "Técnicas de recopilación y análisis de evidencias digitales"
     },
     {
@@ -139,7 +139,7 @@ const ARCHIVE_DB = [
         difficulty: "Medium",
         type: "md",
         content: "Incidentes en CIberseguridad/2526-u3-3-3-3-investigaciontienda-Juan-Perez-Ortega/README.md",
-        image: "Incidentes en CIberseguridad/imagenesSIEM/Kibana.png",
+        image: "Incidentes en CIberseguridad/EL primer ELK/imagenesSIEM/Kibana.png",
         description: "Investigación forense de incidente en tienda online"
     },
     {
@@ -151,7 +151,7 @@ const ARCHIVE_DB = [
         difficulty: "Hard",
         type: "md",
         content: "Incidentes en CIberseguridad/2526-u3-3-3-4-logsmimi-Juan-Perez-Ortega/informe.md",
-        image: "Incidentes en CIberseguridad/imagenesSIEM/KibanaAlertaAtaque.png",
+        image: "Incidentes en CIberseguridad/EL primer ELK/imagenesSIEM/KibanaAlertaAtaque.png",
         description: "Análisis forense de logs y detección de Mimikatz"
     },
 
@@ -301,6 +301,18 @@ const ARCHIVE_DB = [
         content: "Puesta en Produccion Segura/clinica_veterinaria_mobile/README.md",
         image: "Puesta en Produccion Segura/clinica_veterinaria_mobile/docs/img/14-mobsf-sast-summary.png",
         description: "App móvil Flutter para Clínica Veterinaria con OWASP MASVS, Android Keystore, HTTPS forzado, SAST con MobSF y DAST con ZAP"
+    },
+    {
+        id: 24,
+        title: "SIEM ELK + Suricata IDS",
+        subject: "Incidentes en Ciberseguridad",
+        shortSubject: "Incidentes",
+        tags: ["SIEM", "ELK", "Suricata", "IDS", "Kibana", "Logstash", "Filebeat", "Docker", "Hydra", "SSH", "ICMP"],
+        difficulty: "Hard",
+        type: "md",
+        content: "Incidentes en CIberseguridad/Practica-SIEM-ELK-Snort/README.md",
+        image: "Incidentes en CIberseguridad/Practica-SIEM-ELK-Snort/Imagenes/fase5-dashboard-final.png",
+        description: "SIEM completo con ELK Stack 8.15 y Suricata IDS: detección de ataques ICMP y fuerza bruta SSH con Hydra, visualización en Kibana Dashboard"
     }
 ];
 
