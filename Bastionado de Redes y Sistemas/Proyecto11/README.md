@@ -229,7 +229,8 @@ PLAY RECAP *************************************************************
 target-server : ok=20   changed=18   unreachable=0   failed=0
 ```
 
-![Ansible playbook completado](imagenes/06_ansible_playbook.png)
+![Ansible playbook tareas](imagenes/06a_ansible_playbook_tareas.png)
+![Ansible playbook recap](imagenes/06b_ansible_playbook_recap.png)
 
 ### 2.4 Reglas de iptables que se aplican
 
