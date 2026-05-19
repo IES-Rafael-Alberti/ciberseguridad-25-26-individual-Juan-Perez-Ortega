@@ -1,0 +1,26 @@
+---
+- name: Crear directorio para reglas iptables
+  ansible.builtin.file:
+    path: /etc/iptables
+    state: directory
+    mode: '0755'
+
+- name: Aplicar todas las reglas del cortafuegos
+  ansible.builtin.shell: |
+    iptables -F INPUT
+    iptables -F FORWARD
+    iptables -F OUTPUT
+    iptables -A INPUT -i lo -j ACCEPT
+    iptables -A INPUT -m conntrack --ctstate ESTABLISHED,RELATED -j ACCEPT
+    iptables -A INPUT -p tcp -s 172.20.0.0/24 --dport 22 -j ACCEPT
+    iptables -A INPUT -p tcp --dport 80 -j ACCEPT
+    iptables -A INPUT -p icmp --icmp-type echo-request -j ACCEPT
+    iptables -A INPUT -m limit --limit 5/min --limit-burst 10 -j LOG --log-prefix "IPT-DROP: " --log-level 4
+    iptables -P INPUT DROP
+    iptables -P FORWARD DROP
+    iptables -P OUTPUT ACCEPT
+  changed_when: true
+
+- name: Guardar reglas iptables en disco
+  ansible.builtin.shell: iptables-save > /etc/iptables/rules.v4
+  changed_when: true

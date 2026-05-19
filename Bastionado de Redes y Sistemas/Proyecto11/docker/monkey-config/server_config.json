@@ -1,0 +1,6 @@
+{
+    "data_dir": "/monkey_island_data",
+    "log_level": "INFO",
+    "mongo_connection_string": "mongodb://172.20.0.5:27017/monkey_island",
+    "deployment": "docker"
+}

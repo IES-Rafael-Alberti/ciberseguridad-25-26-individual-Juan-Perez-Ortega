@@ -1,0 +1,34 @@
+---
+- name: Iniciar rsyslog si no esta corriendo
+  ansible.builtin.shell: pgrep rsyslogd || rsyslogd || true
+  ignore_errors: yes
+
+- name: Configurar rsyslog para capturar logs de iptables
+  ansible.builtin.copy:
+    dest: /etc/rsyslog.d/10-iptables.conf
+    content: |
+      :msg, contains, "IPT-DROP: " /var/log/iptables.log
+      & stop
+  notify: Reiniciar rsyslog
+
+- name: Crear archivo de log de iptables
+  ansible.builtin.file:
+    path: /var/log/iptables.log
+    state: touch
+    mode: '0644'
+    owner: root
+    group: adm
+
+- name: Configurar logrotate para iptables
+  ansible.builtin.copy:
+    dest: /etc/logrotate.d/iptables
+    content: |
+      /var/log/iptables.log {
+          daily
+          rotate 7
+          compress
+          delaycompress
+          missingok
+          notifempty
+          create 644 root adm
+      }

@@ -1,0 +1,9 @@
+name: proyecto11-security-checks
+title: Proyecto 11 - Verificacion de Seguridad
+maintainer: Juan Perez Ortega
+copyright: Juan Perez Ortega
+license: Apache-2.0
+summary: Controles de seguridad para el servidor objetivo del Proyecto 11
+version: 1.0.0
+supports:
+  - platform: linux

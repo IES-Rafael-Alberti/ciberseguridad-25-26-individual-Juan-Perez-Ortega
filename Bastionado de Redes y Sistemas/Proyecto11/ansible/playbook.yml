@@ -1,0 +1,24 @@
+---
+- name: Configurar servidor objetivo seguro
+  hosts: target
+  become: yes
+  gather_facts: yes
+
+  handlers:
+    - name: Reiniciar nginx
+      ansible.builtin.command: nginx -s reload
+
+    - name: Reiniciar fail2ban
+      ansible.builtin.shell: fail2ban-server reload || fail2ban-server -b start || true
+
+    - name: Reiniciar ssh
+      ansible.builtin.shell: kill -HUP $(cat /var/run/sshd.pid 2>/dev/null) || true
+
+    - name: Reiniciar rsyslog
+      ansible.builtin.shell: pkill rsyslogd || true; sleep 1; rsyslogd || true
+
+  roles:
+    - role: ssh_hardening
+    - role: firewall
+    - role: services
+    - role: logging

@@ -1,0 +1,70 @@
+version: '3.9'
+
+networks:
+  attack-net:
+    driver: bridge
+    ipam:
+      driver: default
+      config:
+        - subnet: 172.20.0.0/24
+          gateway: 172.20.0.1
+
+services:
+  target:
+    build:
+      context: ./docker/target
+      dockerfile: Dockerfile
+    container_name: target
+    hostname: target-server
+    networks:
+      attack-net:
+        ipv4_address: 172.20.0.3
+    ports:
+      - "2222:22"
+      - "8080:80"
+    cap_add:
+      - NET_ADMIN
+    privileged: true
+    restart: unless-stopped
+
+  mongodb:
+    image: mongo:4.4
+    container_name: mongodb
+    networks:
+      attack-net:
+        ipv4_address: 172.20.0.5
+    ports:
+      - "5000:5000"
+    volumes:
+      - mongo-db:/data/db
+    restart: unless-stopped
+
+  monkey-island:
+    image: infectionmonkey/monkey-island:latest
+    container_name: monkey-island
+    network_mode: "container:mongodb"
+    volumes:
+      - monkey-data:/monkey_island_data
+    depends_on:
+      - mongodb
+    restart: unless-stopped
+
+  control:
+    build:
+      context: ./docker/control
+      dockerfile: Dockerfile
+    container_name: control
+    hostname: control
+    networks:
+      attack-net:
+        ipv4_address: 172.20.0.4
+    volumes:
+      - ./ansible:/workspace/ansible
+      - ./inspec:/workspace/inspec
+    depends_on:
+      - target
+    restart: unless-stopped
+
+volumes:
+  monkey-data:
+  mongo-db:

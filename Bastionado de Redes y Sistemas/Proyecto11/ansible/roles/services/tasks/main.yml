@@ -1,0 +1,45 @@
+---
+- name: Verificar que nginx esta corriendo
+  ansible.builtin.command: pgrep nginx
+  ignore_errors: yes
+  changed_when: false
+  register: nginx_check
+
+- name: Iniciar nginx si no esta corriendo
+  ansible.builtin.command: nginx
+  when: nginx_check.rc != 0
+
+- name: Configurar cabeceras de seguridad en nginx
+  ansible.builtin.copy:
+    dest: /etc/nginx/conf.d/security-headers.conf
+    content: |
+      server_tokens off;
+      add_header X-Frame-Options "SAMEORIGIN" always;
+      add_header X-Content-Type-Options "nosniff" always;
+      add_header X-XSS-Protection "1; mode=block" always;
+      add_header Referrer-Policy "no-referrer-when-downgrade" always;
+  notify: Reiniciar nginx
+
+- name: Crear directorio de runtime para fail2ban
+  ansible.builtin.file:
+    path: /var/run/fail2ban
+    state: directory
+    mode: '0755'
+
+- name: Iniciar fail2ban
+  ansible.builtin.shell: fail2ban-server -b start || true
+  ignore_errors: yes
+
+- name: Configurar fail2ban para proteccion SSH
+  ansible.builtin.copy:
+    dest: /etc/fail2ban/jail.d/sshd.conf
+    content: |
+      [sshd]
+      enabled = true
+      port = ssh
+      filter = sshd
+      logpath = /var/log/auth.log
+      maxretry = 3
+      bantime = 3600
+      findtime = 600
+  notify: Reiniciar fail2ban
